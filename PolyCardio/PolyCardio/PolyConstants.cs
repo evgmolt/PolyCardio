@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ApexCardio
+namespace PolyCardio
 {
-    static class ApexConstants
+    static class PolyConstants
     {
-        public const int NumOfChannels = 7;
+        public const int NumOfChannels = 5;
         public const byte M1 = 0xE6;
         public const byte ID = 0x61;
         public const byte cmGetID = 0x5A;
@@ -38,7 +38,7 @@ namespace ApexCardio
         //        public static double ScaleECG_Y = 1;
 //        public static double ScalePPG_Y = 1;
 
-        public const string ConfigFileName = "ApexConf.cfg";
+        public const string ConfigFileName = "PolyConf.cfg";
         public static string FilesToSendFileName = "fts.ls";
 
         public const int ReoMaxVal = 7000000;
@@ -49,6 +49,6 @@ namespace ApexCardio
         public const string Reo2name = "Reo 2";
         public const string Sphigmo1name = "Sphigmo 1";
         public const string Sphigmo2name = "Sphigmo 2";
-        public const string Apexname = "Apex";
+        public const string Polyname = "Poly";
     }
 }

@@ -8,17 +8,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ApexCardio
+namespace PolyCardio
 {
     public partial class FormConfig : Form
     {
-        private readonly ApexConfig cfg;
+        private readonly PolyConfig cfg;
         CheckBox[] CBArr;
-        public FormConfig(ApexConfig cfgarg)
+        public FormConfig(PolyConfig cfgarg)
         {
             InitializeComponent();
             cfg = cfgarg;
-            CBArr = new CheckBox[ApexConstants.NumOfChannels];
+            CBArr = new CheckBox[PolyConstants.NumOfChannels];
             CBArr[0] = checkBox1;
             CBArr[1] = checkBox2;
             CBArr[2] = checkBox3;
@@ -26,7 +26,7 @@ namespace ApexCardio
             CBArr[4] = checkBox5;
             CBArr[5] = checkBox6;
             CBArr[6] = checkBox7;
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 CBArr[i].Checked = cfg.VisibleGraphs[i];
             }
@@ -36,14 +36,14 @@ namespace ApexCardio
             CB_Filter.Checked = cfg.FilterOn;
         }
 
-        public ApexConfig GetDialogData()
+        public PolyConfig GetDialogData()
         {
             return cfg;
         }
 
         private void butOk_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 cfg.VisibleGraphs[i] = CBArr[i].Checked;
             }

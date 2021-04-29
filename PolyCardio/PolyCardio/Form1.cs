@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ApexCardio
+namespace PolyCardio
 {
     struct GraphicsInfo
     {
@@ -22,22 +22,20 @@ namespace ApexCardio
     {
         public event Action<Message> WindowsMessage;
         private DataArrays DataA;
-        public ApexConfig Cfg;
+        public PolyConfig Cfg;
         USBserialPort USBPort;
         public bool Connected;
         private ByteDecomposer decomposer;
         GraphicsInfo[] GInfoArr;
         TrackBar[] AmpBarArr;
         int[] AmpBarVals;
-        private string[] ChannelsNames = { "ECG 1", "ECG 2", "Reogram 1", "Reogram 2", "Sphigmogram 1", "Sphigmogram 2", "Apex cardiogram" };
-        private int[] ChannelsMaxSize = { 60000, 60000, 5000, 5000, 40000, 40000, 4000 };
-        private int chECG1 = 0;
-        private int chECG2 = 1;
-        private int chReo1 = 2;
-        private int chReo2 = 3;
-        private int chSphigmo1 = 4;
-        private int chSphigmo2 = 5;
-        private int chApex = 6;
+        private string[] ChannelsNames = { "ECG", "Reogram", "Sphigmogram 1", "Sphigmogram 2", "Apex cardiogram" };
+        private int[] ChannelsMaxSize = { 60000, 5000, 40000, 40000, 4000 };
+        private int chECG = 0;
+        private int chReo = 1;
+        private int chSphigmo1 = 2;
+        private int chSphigmo2 = 3;
+        private int chApex = 4;
         private double[] ChannelsScaleY;
         private int ViewShift = 0;
         private bool ViewMode = false;
@@ -46,15 +44,13 @@ namespace ApexCardio
         private string CurrentFile;
         private RecordInfo CurrentRecordInfo;
         private bool DataReadyToSave = false;
-        private Archiver7z Archiver;
         private int DelayCounter;
-        private ApexVisirs V;
 //        private bool PaintAver = false;
     
         public Form1()
         {
             InitializeComponent();
-            GInfoArr = new GraphicsInfo[ApexConstants.NumOfChannels];
+            GInfoArr = new GraphicsInfo[PolyConstants.NumOfChannels];
             AmpBarArr = new TrackBar[4];
             AmpBarVals = new int[4];
             ChannelsScaleY = new double[4];
@@ -67,15 +63,7 @@ namespace ApexCardio
             USBPort.ConnectionFailure += onConnectionFailure;
             USBPort.Connect();
 
-            Cfg = ApexConfig.GetConfig();
-            try
-            {
-                Archiver = new Archiver7z(Cfg.ArchiverPath + @"7z.exe");
-            }
-            catch (Exception ex)
-            {
-                //                MessageBox.Show(ex.Message);
-            }
+            Cfg = PolyConfig.GetConfig();
 
             numUDplevel1.Value = Cfg.PressLevel1;
             numUDplevel2.Value = Cfg.PressLevel2;
@@ -92,19 +80,18 @@ namespace ApexCardio
             }
 
 
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 GInfoArr[i].Visible = Cfg.VisibleGraphs[i];
             }
-            V = new ApexVisirs();
             UpdateGraphics();
         }
 
         private void InitDevice()
         {
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel1);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel1);
             USBPort.WriteByte(Cfg.PressLevel1);
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel2);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel2);
             USBPort.WriteByte(Cfg.PressLevel2);
         }
 
@@ -114,7 +101,6 @@ namespace ApexCardio
             decomposer = new ByteDecomposer(DataA);
             decomposer.ConnectionBreakdown += ConnectionBreak;
             decomposer.DecomposeLineEvent += LineReceived;
-            decomposer.BPcompleted += BPcomplete;
         }
 
         private void CheckDataDir()
@@ -130,19 +116,13 @@ namespace ApexCardio
 
         void LineReceived(object sender, EventArgs arg)
         {
-            labP1.Text = (DataA.Reo1Array[decomposer.MainIndex]).ToString();
-            labP2.Text = (DataA.Reo2Array[decomposer.MainIndex]).ToString();
-            labP3.Text = (DataA.ECG1Array[decomposer.MainIndex]).ToString();
+            labP1.Text = (DataA.ReoArray[decomposer.MainIndex]).ToString();
+            labP3.Text = (DataA.ECGArray[decomposer.MainIndex]).ToString();
 
 //            labP1.Text = (DataA.Sphigmo1Array[decomposer.MainIndex] / k).ToString();
 //            labP2.Text = (DataA.Sphigmo2Array[decomposer.MainIndex] / k).ToString();
-//            labP3.Text = (DataA.ApexArray[decomposer.MainIndex] / k).ToString();
+//            labP3.Text = (DataA.PolyArray[decomposer.MainIndex] / k).ToString();
             labStatus.Text = Convert.ToString(decomposer.Status, 2);
-            if ((decomposer.Status & ByteDecomposer.bp1error) == 0)
-                labBP1.Text = decomposer.PrSYS1.ToString() + " / " + decomposer.PrDIA1.ToString();
-            if ((decomposer.Status & ByteDecomposer.bp2error) == 0)
-                labBP2.Text = decomposer.PrSYS2.ToString() + " / " + decomposer.PrDIA2.ToString();
-
         }
 
         void NewLineReceived(object sender, EventArgs agr)
@@ -161,53 +141,10 @@ namespace ApexCardio
         }
 
 
-        private void BPcomplete(object sender, BPEventArgs arg)
-        {
-            string mess;
-            if ((arg.status & ByteDecomposer.bp1completed) != 0)
-            {
-                mess = "BP 1 " + decomposer.PrSYS1.ToString() + "/" +
-                                 decomposer.PrDIA1.ToString();
-                labBP1.Text = decomposer.PrSYS1.ToString() + " / "+ decomposer.PrDIA1.ToString();
-                if (CurrentRecordInfo != null)
-                {
-                    CurrentRecordInfo.Data.ABP[0] = decomposer.PrSYS1;
-                    CurrentRecordInfo.Data.ABP[1] = decomposer.PrDIA1;
-                    CurrentRecordInfo.Save(Cfg);
-                    UpdateRecInfoBox(CurrentRecordInfo);
-                }
-            }
-            if ((arg.status & ByteDecomposer.bp1error) != 0)
-            {
-                mess = "BP 1 error";
-                labBP1.Text = "Error";
-            }
-            if ((arg.status & ByteDecomposer.bp2completed) != 0)
-            {
-                mess = "BP 2 " + decomposer.PrSYS2.ToString() + "/" +
-                                 decomposer.PrDIA2.ToString();
-                labBP2.Text = decomposer.PrSYS2.ToString() + " / " + decomposer.PrDIA2.ToString();
-                if (CurrentRecordInfo != null)
-                {
-                    CurrentRecordInfo.Data.ABP[0] = decomposer.PrSYS2;
-                    CurrentRecordInfo.Data.ABP[1] = decomposer.PrDIA2;
-                    CurrentRecordInfo.Save(Cfg);
-                    UpdateRecInfoBox(CurrentRecordInfo);
-                }
-
-            }
-            if ((arg.status & ByteDecomposer.bp2error) != 0)
-            {
-                mess = "BP 2 error";
-                labBP2.Text = "Error";
-            }
-        }
-
-
 
         public void UpdateGraphics()
         {
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 GInfoArr[i].Visible = Cfg.VisibleGraphs[i];
             }
@@ -224,7 +161,7 @@ namespace ApexCardio
             int space = 14;
             int Y = 0;
             int singleHeight = panelGraph.Height / num - space;
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 GraphicsInfo gi = GInfoArr[i];
                 if (gi.Visible)
@@ -233,7 +170,6 @@ namespace ApexCardio
                     gi.LabName.Location = new Point(space, Y);
                     gi.LabName.Text = ChannelsNames[i]; 
                     gi.BufPanel = new BufferedPanel(i);
-                    gi.BufPanel.MouseDown += BufPanel_MouseDown;
                     gi.BufPanel.Cursor = Cursors.Cross;
                     gi.BufPanel.Location = new Point(space, Y + space);
                     Y = Y + singleHeight + space;
@@ -243,8 +179,6 @@ namespace ApexCardio
                     if (i == 2) gi.BufPanel.Paint += bufferedPanel2_Paint;
                     if (i == 3) gi.BufPanel.Paint += bufferedPanel3_Paint;
                     if (i == 4) gi.BufPanel.Paint += bufferedPanel4_Paint;
-                    if (i == 5) gi.BufPanel.Paint += bufferedPanel5_Paint;
-                    if (i == 6) gi.BufPanel.Paint += bufferedPanel6_Paint;
                     panelGraph.Controls.Add(gi.BufPanel);
                     panelGraph.Controls.Add(gi.LabName);
                     GInfoArr[i] = gi;
@@ -270,12 +204,12 @@ namespace ApexCardio
                     AmpBarArr[i] = null;
                 }
             }
-            if (GInfoArr[chECG1].Visible | GInfoArr[chECG2].Visible)
+            if (GInfoArr[chECG].Visible)
             {
                 AmpBarArr[0] = new TrackBar();
                 AmpBarArr[0].ValueChanged += trackBarECG_ValueChanged;
             }
-            if (GInfoArr[chReo1].Visible | GInfoArr[chReo2].Visible)
+            if (GInfoArr[chReo].Visible)
             {
                 AmpBarArr[1] = new TrackBar();
                 AmpBarArr[1].ValueChanged += trackBarReo_ValueChanged;
@@ -291,7 +225,7 @@ namespace ApexCardio
                 AmpBarArr[3].ValueChanged += trackBarApex_ValueChanged;
             }
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < AmpBarArr.Length; i++)
             {
                 if (AmpBarArr[i] != null)
                 {
@@ -304,25 +238,11 @@ namespace ApexCardio
             }
             if (AmpBarArr[0] != null)
             {
-                if ((GInfoArr[chECG1].Visible ^ GInfoArr[chECG2].Visible))
-                {
                     AmpBarArr[0].Size = new Size(45, singleHeight);
-                }
-                else
-                {
-                    AmpBarArr[0].Size = new Size(45, singleHeight * 2);
-                }
             }
             if (AmpBarArr[1] != null)
             {
-                if ((GInfoArr[chReo1].Visible ^ GInfoArr[chReo2].Visible))
-                {
                     AmpBarArr[1].Size = new Size(45, singleHeight);
-                }
-                else
-                {
-                    AmpBarArr[1].Size = new Size(45, singleHeight * 2);
-                }
             }
             if (AmpBarArr[2] != null)
             {
@@ -386,60 +306,34 @@ namespace ApexCardio
                 penD.Dispose();
             }
 
-            var pen1 = new Pen(Color.Blue, 1);
-            if (V.Visir1.Visible)
-                e.Graphics.DrawLine(pen1, V.Visir1.X - ViewShift, R0.Top, V.Visir1.X - ViewShift, R0.Height);
-            if (V.Visir2.Visible)
-                e.Graphics.DrawLine(pen1, V.Visir2.X - ViewShift, R0.Top, V.Visir2.X - ViewShift, R0.Height);
-            pen1.Dispose();
-
-            if (data == DataA.ECG1ViewArray)
-            
-                if (V.Visir1.Visible & V.Visir2.Visible)
-                {
-                    var penR = new Pen(Color.Green, 1);
-                    for (int i = 0; i < DataA.RInd; i++)
-                    {
-                        e.Graphics.DrawLine(penR, DataA.RArray[i] - ViewShift, R0.Top, DataA.RArray[i] - ViewShift, R0.Height);
-                    }
-                    penR.Dispose();
-                }
         }
 
         private void bufferedPanel0_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ECG1ViewArray, null, GInfoArr[0].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
+                buffPanel_Paint(DataA.ECGViewArray, null, GInfoArr[0].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
         }
         private void bufferedPanel1_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ECG2ViewArray, null, GInfoArr[1].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[1], e);
+                buffPanel_Paint(DataA.ReoViewArray, null, GInfoArr[1].BufPanel, ChannelsScaleY[1], ChannelsMaxSize[1], e);
         }
         private void bufferedPanel2_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.Reo1ViewArray, null, GInfoArr[2].BufPanel, ChannelsScaleY[1], ChannelsMaxSize[2], e);
+                buffPanel_Paint(DataA.Sphigmo1ViewArray, null, GInfoArr[2].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[2], e);
         }
         private void bufferedPanel3_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.Reo2ViewArray, null, GInfoArr[3].BufPanel, ChannelsScaleY[1], ChannelsMaxSize[3], e);
+                buffPanel_Paint(DataA.Sphigmo2ViewArray, null, GInfoArr[3].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[3], e);
         }
         private void bufferedPanel4_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.Sphigmo1ViewArray, null, GInfoArr[4].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[4], e);
-        }
-        private void bufferedPanel5_Paint(object sender, PaintEventArgs e)
-        {
-                buffPanel_Paint(DataA.Sphigmo2ViewArray, null, GInfoArr[5].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[5], e);
-        }
-        private void bufferedPanel6_Paint(object sender, PaintEventArgs e)
-        {
-                buffPanel_Paint(DataA.ApexViewArray, null, GInfoArr[6].BufPanel, ChannelsScaleY[3], ChannelsMaxSize[6], e);
+                buffPanel_Paint(DataA.ApexViewArray, null, GInfoArr[4].BufPanel, ChannelsScaleY[3], ChannelsMaxSize[3], e);
         }
 
 
         private void onConnectionFailure(Exception obj)
         {
-            string messageText = ApexStrings.txErrorInitPort;
-            string caption = ApexStrings.txError;
+            string messageText = PolyStrings.txErrorInitPort;
+            string caption = PolyStrings.txError;
             MessageBoxButtons but = MessageBoxButtons.OK;
             MessageBoxIcon icon = MessageBoxIcon.Error;
             MessageBox.Show(messageText, caption, but, icon);
@@ -461,7 +355,7 @@ namespace ApexCardio
             UpdateGraphics();
 /*            if (ViewMode & decomposer != null)
             {
-                UpdateScrollBar(decomposer.Data.ApexArray.Length);
+                UpdateScrollBar(decomposer.Data.PolyArray.Length);
             }
             else
             {
@@ -475,7 +369,7 @@ namespace ApexCardio
             if (fc.ShowDialog() == DialogResult.OK)
             {
                 Cfg = fc.GetDialogData();
-                ApexConfig.SaveConfig(Cfg);
+                PolyConfig.SaveConfig(Cfg);
                 UpdateGraphics();
             }
             fc.Dispose();
@@ -487,20 +381,20 @@ namespace ApexCardio
             {
                 if (Connected & decomposer.DeviceTurnedOn)
                 {
-                    USBPort.WriteByte(ApexConstants.cmStopPump1);
-                    USBPort.WriteByte(ApexConstants.cmStopPump2);
+                    USBPort.WriteByte(PolyConstants.cmStopPump1);
+                    USBPort.WriteByte(PolyConstants.cmStopPump2);
                 }
             }
             if (WindowState == FormWindowState.Maximized) Cfg.Maximized = true;
             else Cfg.Maximized = false;
             Cfg.WindowWidth = Width;
             Cfg.WindowHeight = Height;
-            ApexConfig.SaveConfig(Cfg);
+            PolyConfig.SaveConfig(Cfg);
         }
 
         private void timerPaint_Tick(object sender, EventArgs e)
         {
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 if (GInfoArr[i].Visible)
                 {
@@ -535,14 +429,10 @@ namespace ApexCardio
 
             if (decomposer != null)
             {
-                butNewRecord.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted & !decomposer.BP1measStarted;
-                butStartRecord.Enabled = Connected & !decomposer.RecordStarted & !ViewMode & decomposer.DeviceTurnedOn & CurrentRecordInfo != null & !decomposer.BP1measStarted;
+                butNewRecord.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
+                butStartRecord.Enabled = Connected & !decomposer.RecordStarted & !ViewMode & decomposer.DeviceTurnedOn & CurrentRecordInfo != null;
                 butFlow.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
                 butEditRecInfo.Enabled = CurrentRecordInfo != null & !decomposer.RecordStarted;
-                butBPMeas1.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted & !decomposer.BP1measStarted;
-                butBPabort1.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted & decomposer.BP1measStarted;
-                butBPmeas2.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted & !decomposer.BP2measStarted;
-                butBPabort2.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted & decomposer.BP2measStarted;
                 butPump1start.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.Pump1Started;
                 butPump2start.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.Pump2Started; ;
                 butPump1stop.Enabled = Connected & decomposer.DeviceTurnedOn;
@@ -554,9 +444,6 @@ namespace ApexCardio
             {
                 butFlow.Enabled = false;
                 butEditRecInfo.Enabled = CurrentRecordInfo != null;
-                butBPMeas1.Enabled = CurrentRecordInfo != null;
-                butBPMeas1.Enabled = false;
-                butBPabort1.Enabled = false;
             }
 
             if (USBPort == null)
@@ -610,13 +497,13 @@ namespace ApexCardio
             for (int i = 0; i < lines.Length; i++)
             {
                 string s;
-                if (i < ApexConstants.PatientFieldsCount)
+                if (i < PolyConstants.PatientFieldsCount)
                 {
                     s = lines[i] + System.Environment.NewLine;
                     textBoxRecInfo.Text += s;
                 }
                 else
-                    if (riarg.Data.DiagnArray[i - ApexConstants.PatientFieldsCount])
+                    if (riarg.Data.DiagnArray[i - PolyConstants.PatientFieldsCount])
                     {
                         s = riarg.Data.ItemNames[i] + " ";
                         textBoxRecInfo.Text += s;
@@ -634,7 +521,7 @@ namespace ApexCardio
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 Cfg.DataDir = Path.GetDirectoryName(saveFileDialog1.FileName) + @"\";
-                ApexConfig.SaveConfig(Cfg);
+                PolyConfig.SaveConfig(Cfg);
                 CurrentFile = Path.GetFileName(saveFileDialog1.FileName);
                 var ri = new RecordInfo(Cfg, CurrentFile);
                 ri.Data.Date = DateTime.Now;
@@ -651,9 +538,9 @@ namespace ApexCardio
             UpdateRecInfoBox(CurrentRecordInfo);
 
             pbRecordProgress.Maximum = Cfg.RecordLength * ByteDecomposer.SamplingFrequency;
-            //            string fname = String.Concat(Cfg.DataDir.ToString(), CurrentFile, ApexConstants.DataFileExtension);
+            //            string fname = String.Concat(Cfg.DataDir.ToString(), CurrentFile, PolyConstants.DataFileExtension);
             //            filestream = new FileStream(fname, FileMode.Create);
-            textWriter = new StreamWriter(Cfg.DataDir.ToString() + ApexConstants.TmpTextFile);
+            textWriter = new StreamWriter(Cfg.DataDir.ToString() + PolyConstants.TmpTextFile);
             decomposer.TotalBytes = 0;
             decomposer.LineCounter = 0;
             decomposer.DecomposeLineEvent += NewLineReceived;
@@ -700,7 +587,6 @@ namespace ApexCardio
 
         private void StopRecord()
         {
-            V.ResetVisirs();
             pbRecordProgress.Visible = false;
             labRecordSize.Visible = false;
             CurrentRecordInfo.Data.Length = decomposer.TotalBytes / ByteDecomposer.BytesInBlock / ByteDecomposer.SamplingFrequency;
@@ -714,7 +600,7 @@ namespace ApexCardio
 //            filestream.Close();
 //            filestream.Dispose();
             if (textWriter != null) textWriter.Dispose();
-            string[] lines = File.ReadAllLines(Cfg.DataDir.ToString() + ApexConstants.TmpTextFile);
+            string[] lines = File.ReadAllLines(Cfg.DataDir.ToString() + PolyConstants.TmpTextFile);
             File.AppendAllLines(CurrentRecordInfo.FileName, lines);
 
             ViewMode = true;
@@ -747,13 +633,8 @@ namespace ApexCardio
 
         private void butSaveRecord_Click(object sender, EventArgs e)
         {
-            if (Archiver != null)
-            {
-                Archiver.AddToArchive(Cfg.DataDir.ToString() + CurrentFile + ApexConstants.ArchiverFileExtension,
-                                      Cfg.DataDir.ToString() + CurrentFile);
-            }
             Cfg.DataFileNum++;
-            ApexConfig.SaveConfig(Cfg);
+            PolyConfig.SaveConfig(Cfg);
             DataReadyToSave = false;
             CurrentRecordInfo = null;
             textBoxRecInfo.Clear();
@@ -781,8 +662,8 @@ namespace ApexCardio
             else
             {
                 string[] lines = File.ReadAllLines(Cfg.DataDir.ToString() + CurrentFile, Encoding.Default);
-                string[] ldata = lines.Skip(ApexConstants.HeaderSize).ToArray();
-                string[] lrec = lines.Take(ApexConstants.HeaderSize).ToArray();
+                string[] ldata = lines.Skip(PolyConstants.HeaderSize).ToArray();
+                string[] lrec = lines.Take(PolyConstants.HeaderSize).ToArray();
                 var ri = new RecordInfo(Cfg, CurrentFile, lrec);
                 var fri = new FormRecordInfo(ri);
                 if (fri.ShowDialog() == DialogResult.OK)
@@ -804,8 +685,7 @@ namespace ApexCardio
             ChannelsScaleY[0] = Math.Pow(2, a / 2);
             if (ViewMode)
             {
-                if (GInfoArr[chECG1].Visible) GInfoArr[chECG1].BufPanel.Refresh();
-                if (GInfoArr[chECG2].Visible) GInfoArr[chECG2].BufPanel.Refresh();
+                if (GInfoArr[chECG].Visible) GInfoArr[chECG].BufPanel.Refresh();
             }
         }
 
@@ -816,8 +696,7 @@ namespace ApexCardio
             ChannelsScaleY[1] = Math.Pow(2, a / 2);
             if (ViewMode)
             {
-                if (GInfoArr[chReo1].Visible) GInfoArr[chReo1].BufPanel.Refresh();
-                if (GInfoArr[chReo2].Visible) GInfoArr[chReo2].BufPanel.Refresh();
+                if (GInfoArr[chReo].Visible) GInfoArr[chReo].BufPanel.Refresh();
             }
         }
 
@@ -849,10 +728,8 @@ namespace ApexCardio
             for (int i = skip; i < lines.Length; i++)
             {
                 string[] s = lines[i].Split(Convert.ToChar(9));
-                a.ECG1Array[i - skip] = Convert.ToInt32(s[1]);
-                a.ECG2Array[i - skip] = Convert.ToInt32(s[2]);
-                a.Reo1Array[i - skip] = Convert.ToInt32(s[3]);
-                a.Reo2Array[i - skip] = Convert.ToInt32(s[4]);
+                a.ECGArray[i - skip] = Convert.ToInt32(s[1]);
+                a.ReoArray[i - skip] = Convert.ToInt32(s[3]);
                 a.Sphigmo1Array[i - skip] = Convert.ToInt32(s[5]);
                 a.Sphigmo2Array[i - skip] = Convert.ToInt32(s[6]);
                 a.ApexArray[i - skip] = Convert.ToInt32(s[7]);
@@ -871,9 +748,8 @@ namespace ApexCardio
             {
                 if (File.Exists(openFileDialog1.FileName))
                 {
-                    V.ResetVisirs();
                     Cfg.DataDir = Path.GetDirectoryName(openFileDialog1.FileName) + @"\";
-                    ApexConfig.SaveConfig(Cfg);
+                    PolyConfig.SaveConfig(Cfg);
                     ViewMode = true;
                     ViewShift = 0;
                     timerRead.Enabled = false;
@@ -884,7 +760,7 @@ namespace ApexCardio
                     CurrentRecordInfo = ri;
 
                     string[] lines = File.ReadAllLines(openFileDialog1.FileName);
-                    int size = lines.Count() - ApexConstants.HeaderSize;
+                    int size = lines.Count() - PolyConstants.HeaderSize;
                     UpdateScrollBar(size);
                     
                     if (size == 0)
@@ -894,8 +770,8 @@ namespace ApexCardio
                     }
 
                     DataA = new DataArrays(size+1000);
-                    decomposer = ParseData(lines, DataA, ApexConstants.HeaderSize);
-                    decomposer.CountViewArrays(lines.Length - ApexConstants.HeaderSize, Cfg.FilterOn);
+                    decomposer = ParseData(lines, DataA, PolyConstants.HeaderSize);
+                    decomposer.CountViewArrays(lines.Length - PolyConstants.HeaderSize, Cfg.FilterOn);
                     SetScale(size);
                     foreach (GraphicsInfo gi in GInfoArr)
                     {
@@ -913,39 +789,22 @@ namespace ApexCardio
             double coeff = 1.5;
             int r1 = 0;
             int r2 = 0;
-            if (GInfoArr[0].Visible)
-            {
-                r1 = DataProcessing.GetRange(DataA.ECG1ViewArray, size);
-            }
-            if (GInfoArr[1].Visible)
-            {
-                r2 = DataProcessing.GetRange(DataA.ECG2ViewArray, size);
-            }
-            ChannelsMaxSize[0] = (int)(coeff * Math.Max(r1, r2));
-            ChannelsMaxSize[1] = (int)(coeff * Math.Max(r1, r2));
+            
+            ChannelsMaxSize[0] = (int)(DataProcessing.GetRange(DataA.ECGViewArray, size));
+            ChannelsMaxSize[1] = (int)(DataProcessing.GetRange(DataA.ReoViewArray, size));
             r1 = 0;
             r2 = 0;
             if (GInfoArr[2].Visible)
             {
-                r1 = DataProcessing.GetRange(DataA.Reo1ViewArray, size);
+                r1 = DataProcessing.GetRange(DataA.Sphigmo1ViewArray, size);
             }
             if (GInfoArr[3].Visible)
             {
-                r2 = DataProcessing.GetRange(DataA.Reo2ViewArray, size);
+                r2 = DataProcessing.GetRange(DataA.Sphigmo2ViewArray, size);
             }
             ChannelsMaxSize[2] = (int)(coeff * Math.Max(r1, r2));
             ChannelsMaxSize[3] = (int)(coeff * Math.Max(r1, r2));
-            if (GInfoArr[4].Visible)
-            {
-                r1 = DataProcessing.GetRange(DataA.Sphigmo1ViewArray, size);
-            }
-            if (GInfoArr[5].Visible)
-            {
-                r2 = DataProcessing.GetRange(DataA.Sphigmo2ViewArray, size);
-            }
-            ChannelsMaxSize[4] = (int)(coeff * Math.Max(r1, r2));
-            ChannelsMaxSize[5] = (int)(coeff * Math.Max(r1, r2));
-            ChannelsMaxSize[6] = (int)(DataProcessing.GetRange(DataA.ApexViewArray, size) * coeff);
+            ChannelsMaxSize[4] = (int)(DataProcessing.GetRange(DataA.ApexViewArray, size) * coeff);
         }
 
         private void butFlow_Click(object sender, EventArgs e)
@@ -978,25 +837,25 @@ namespace ApexCardio
         private void numUDplevel1_ValueChanged(object sender, EventArgs e)
         {
             Cfg.PressLevel1 = (byte)numUDplevel1.Value;
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel1);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel1);
             USBPort.WriteByte(Cfg.PressLevel1);
         }
 
         private void numUDplevel2_ValueChanged(object sender, EventArgs e)
         {
             Cfg.PressLevel2 = (byte)numUDplevel2.Value;
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel2);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel2);
             USBPort.WriteByte(Cfg.PressLevel2);
         }
 
         private void butPumpsStart_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel1);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel1);
             USBPort.WriteByte(Cfg.PressLevel1);
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel2);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel2);
             USBPort.WriteByte(Cfg.PressLevel2);
-            USBPort.WriteByte(ApexConstants.cmStartPump1);
-            USBPort.WriteByte(ApexConstants.cmStartPump2);
+            USBPort.WriteByte(PolyConstants.cmStartPump1);
+            USBPort.WriteByte(PolyConstants.cmStartPump2);
             if (decomposer != null)
             {
                 decomposer.Pump1Started = true;
@@ -1006,9 +865,9 @@ namespace ApexCardio
 
         private void butPump1start_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel1);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel1);
             USBPort.WriteByte(Cfg.PressLevel1);
-            USBPort.WriteByte(ApexConstants.cmStartPump1);
+            USBPort.WriteByte(PolyConstants.cmStartPump1);
             if (decomposer != null)
             {
                 decomposer.Pump1Started = true;
@@ -1017,9 +876,9 @@ namespace ApexCardio
 
         private void butPump2start_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmSetPressLevel2);
+            USBPort.WriteByte(PolyConstants.cmSetPressLevel2);
             USBPort.WriteByte(Cfg.PressLevel2);
-            USBPort.WriteByte(ApexConstants.cmStartPump2);
+            USBPort.WriteByte(PolyConstants.cmStartPump2);
             if (decomposer != null)
             {
                 decomposer.Pump2Started = true;
@@ -1028,8 +887,8 @@ namespace ApexCardio
 
         private void butPumpsStop_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmStopPump1);
-            USBPort.WriteByte(ApexConstants.cmStopPump2);
+            USBPort.WriteByte(PolyConstants.cmStopPump1);
+            USBPort.WriteByte(PolyConstants.cmStopPump2);
             if (decomposer != null)
             {
                 decomposer.Pump1Started = false;
@@ -1039,7 +898,7 @@ namespace ApexCardio
 
         private void butPump1stop_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmStopPump1);
+            USBPort.WriteByte(PolyConstants.cmStopPump1);
             if (decomposer != null)
             {
                 decomposer.Pump1Started = false;
@@ -1048,7 +907,7 @@ namespace ApexCardio
 
         private void butPump2stop_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmStopPump2);
+            USBPort.WriteByte(PolyConstants.cmStopPump2);
             if (decomposer != null)
             {
                 decomposer.Pump2Started = false;
@@ -1057,103 +916,12 @@ namespace ApexCardio
 
         private void butBPMeas_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmStartBP1);
+            USBPort.WriteByte(PolyConstants.cmStartBP1);
         }
 
         private void butBPabort_Click(object sender, EventArgs e)
         {
-            USBPort.WriteByte(ApexConstants.cmCancelBP1);
-        }
-
-        private void butBPmeas2_Click(object sender, EventArgs e)
-        {
-            USBPort.WriteByte(ApexConstants.cmStartBP2);
-        }
-
-        private void butBPabort2_Click(object sender, EventArgs e)
-        {
-            USBPort.WriteByte(ApexConstants.cmCancelBP2);
-        }
-
-        
-        private void BufPanel_MouseDown(object sender, MouseEventArgs e)
-        {
-            V.UpdateVisirs(e.X, ViewShift);
-            label1.Text = V.Visir1.X.ToString() + " / " + V.Visir2.X.ToString();
-            if (V.Visir1.Visible & V.Visir2.Visible)
-            {
-                DetectECG();
-                butAnalyze.Enabled = true;
-            }
-        }
-
-
-        private void DetectECG()
-        {
-            DataA.RInd = 0;
-            int InsideC = 0;
-            int start = V.Visir1.X;
-            int stop = V.Visir2.X;
-            int max = 0;
-            for (int i = start; i < stop; i++)
-            {
-                max = Math.Max(max, (int)Math.Round(DataProcessing.GetCorr(DataA.ECG1ViewArray, i)));
-            }
-            double DetectLevel = max / 2;
-            bool Rnow = false;
-            InsideC = 0;
-            for (int i = start; i < stop; i++)
-            {
-                InsideC++;
-                if (InsideC > 20)
-                {
-                    if (!Rnow)
-                    {
-                        if (DataProcessing.GetCorr(DataA.ECG1ViewArray, i) > DetectLevel)
-                        {
-                            Rnow = true;
-                        }
-                    }
-                    else
-                    {
-                        if (DataA.ECG1ViewArray[i] < DataA.ECG1ViewArray[i - 1])
-                        {
-                            DataA.RArray[DataA.RInd] = i + DataProcessing.CorrPattLen / 2;
-                            DataA.RInd++;
-                            InsideC = 0;
-                            Rnow = false;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void CountAllAver()
-        {
-            for (int i = 0; i < DataA.AverList.Count(); i++)
-            {
-                DataProcessing.CountAver(DataA.AverList[i], DataA.ViewList[i], DataA.RArray, DataA.RInd, 0);
-            }
-
-            for (int i = 2; i < DataA.AverList.Count(); i++)
-            {
-                DataProcessing.CountDerivative(DataA.AverList[i], DataA.FirstDerivList[i], DataA.FirstDerivApex.Length);
-                DataProcessing.CountDerivative(DataA.FirstDerivList[i], DataA.SecDerivList[i], DataA.FirstDerivApex.Length);
-            }
-
-            int Size = 20;
-            for (int i = 0; i < DataA.AverList.Count(); i++)
-            {
-                DataProcessing.CutArray(DataA.AverList[i], Size);
-            }
-            for (int i = 0; i < DataA.FirstDerivList.Count(); i++)
-            {
-                DataProcessing.CutArray(DataA.FirstDerivList[i], Size);
-            }
-            for (int i = 0; i < DataA.SecDerivList.Count(); i++)
-            {
-                DataProcessing.CutArray(DataA.SecDerivList[i], Size);
-            }
+            USBPort.WriteByte(PolyConstants.cmCancelBP1);
         }
 
         private string GetName(int n)
@@ -1161,126 +929,22 @@ namespace ApexCardio
             switch (n)
             {
                 case 0:
-                    return ApexConstants.ECG1name;
+                    return PolyConstants.ECG1name;
                 case 1:
-                    return ApexConstants.ECG2name;
+                    return PolyConstants.ECG2name;
                 case 2:
-                    return ApexConstants.Reo1name;
+                    return PolyConstants.Reo1name;
                 case 3:
-                    return ApexConstants.Reo2name;
+                    return PolyConstants.Reo2name;
                 case 4:
-                    return ApexConstants.Sphigmo1name;
+                    return PolyConstants.Sphigmo1name;
                 case 5:
-                    return ApexConstants.Sphigmo2name;
+                    return PolyConstants.Sphigmo2name;
                 case 6:
-                    return ApexConstants.Apexname;
+                    return PolyConstants.Polyname;
             }
             return null;
         }
-
-        private double[] GetArray(int n)
-        {
-            switch (n)
-            {
-                case 0:
-                    return DataA.AverECG1;
-                case 1:
-                    return DataA.AverECG2;
-                case 2:
-                    return DataA.AverReo1;
-                case 3:
-                    return DataA.AverReo2;
-                case 4:
-                    return DataA.AverSphigmo1;
-                case 5:
-                    return DataA.AverSphigmo2;
-                case 6:
-                    return DataA.AverApex;
-            }
-            return null;
-        }
-
-        private double[] GetSecDerivArray(int n)
-        {
-            switch (n)
-            {
-                case 0:
-                    return null;
-                case 1:
-                    return null;
-                case 2:
-                    return DataA.SecDerivReo1;
-                case 3:
-                    return DataA.SecDerivReo2;
-                case 4:
-                    return DataA.SecDerivSphigmo1;
-                case 5:
-                    return DataA.SecDerivSphigmo2;
-                case 6:
-                    return DataA.SecDerivApex;
-            }
-            return null;
-        }
-
-        private double[] GetFirstDerivArray(int n)
-        {
-            switch (n)
-            {
-                case 0:
-                    return null;
-                case 1:
-                    return null;
-                case 2:
-                    return DataA.FirstDerivReo1;
-                case 3:
-                    return DataA.FirstDerivReo2;
-                case 4:
-                    return DataA.FirstDerivSphigmo1;
-                case 5:
-                    return DataA.FirstDerivSphigmo2;
-                case 6:
-                    return DataA.FirstDerivApex;
-            }
-            return null;
-        }
-
-        private void butAnalyze_Click(object sender, EventArgs e)
-        {
-            {
-                CountAllAver();
-                List<SingleData> DataList;
-                DataList = new List<SingleData>();
-                for (int i = 0; i < GInfoArr.Length; i++)
-                {
-                    if (GInfoArr[i].Visible)
-                    {
-                        SingleData SD;
-                        SD.MainData = GetArray(i);
-                        SD.FirstDerivData = GetFirstDerivArray(i);
-                        SD.SecDerivData = GetSecDerivArray(i);
-                        SD.FirstDerivNorm = DataProcessing.Norm(SD.FirstDerivData);
-                        SD.SecDerivNorm = DataProcessing.Norm(SD.SecDerivData);
-                        SD.Name = GetName(i);
-                        DataList.Add(SD);
-                    }
-                }
-                var fem = new FormEditMarkers(DataList);
-                fem.ShowDialog();
-                fem.Dispose();
-
-                V.NumOfClick = 2;
-                V.UpdateVisirs(0, ViewShift);
-                butAnalyze.Enabled = false;
-                butReset.Enabled = true;
-            }
-
-        }
-
-        private void butReset_Click(object sender, EventArgs e)
-        {
-            butReset.Enabled = false;
-        }
-
     }
 }
 

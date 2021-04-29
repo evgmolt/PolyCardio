@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApexCardio
+namespace PolyCardio
 {
-    public static class ApexStrings
+    public static class PolyStrings
     {
         public const string txErrorInitPort = "Error initialize virtual serial port";
         public const string txError = "Error";

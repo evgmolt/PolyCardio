@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace ApexCardio
+namespace PolyCardio
 {
     public class RecordInfoData
     {
@@ -47,7 +47,7 @@ namespace ApexCardio
                     "AH 2 degree",
                     "AH 3 degree",
                     "DM"};
-            DiagnArray = new bool[ApexConstants.DiagnCount];
+            DiagnArray = new bool[PolyConstants.DiagnCount];
             ABP = new int[2];
 
         }
@@ -55,15 +55,15 @@ namespace ApexCardio
 
     public class RecordInfo
     {
-        public int NumOfProperties = ApexConstants.PatientFieldsCount + ApexConstants.DiagnCount;
+        public int NumOfProperties = PolyConstants.PatientFieldsCount + PolyConstants.DiagnCount;
         private string SignSelected = "V";
         private char ABPseparator = '/';
         public RecordInfoData Data;
         public string FileName;
-        private string[] ColumnNames = { "Date/time", "ECG1", "ECG2", "Reo 1", "Reo 2", "Sphigmo 1", "Sphigmo 2", "Apex" };
+        private string[] ColumnNames = { "Date/time", "ECG1", "ECG2", "Reo 1", "Reo 2", "Sphigmo 1", "Sphigmo 2", "Poly" };
 
 
-        public RecordInfo(ApexConfig cfg, string fNameArg, string[] lines)
+        public RecordInfo(PolyConfig cfg, string fNameArg, string[] lines)
         {
             FileName = cfg.DataDir + fNameArg;
             Data = new RecordInfoData();
@@ -79,14 +79,14 @@ namespace ApexCardio
             Data.ABP[0] = Convert.ToInt16(s[0]);
             Data.ABP[1] = Convert.ToInt16(s[1]);
             Data.Note = lines[8];
-            for (int i = ApexConstants.PatientFieldsCount; i < ApexConstants.PatientFieldsCount+ApexConstants.DiagnCount; i++)
+            for (int i = PolyConstants.PatientFieldsCount; i < PolyConstants.PatientFieldsCount+PolyConstants.DiagnCount; i++)
             {
-               Data.DiagnArray[i - ApexConstants.PatientFieldsCount] = lines[i] == SignSelected;
+               Data.DiagnArray[i - PolyConstants.PatientFieldsCount] = lines[i] == SignSelected;
             }
         }
 
 
-        public RecordInfo(ApexConfig cfg, string fNameArg)
+        public RecordInfo(PolyConfig cfg, string fNameArg)
         {
             FileName = cfg.DataDir + fNameArg;
             Data=new RecordInfoData();
@@ -106,9 +106,9 @@ namespace ApexCardio
                 Data.ABP[0] = Convert.ToInt16(s[0]);
                 Data.ABP[1] = Convert.ToInt16(s[1]);
                 Data.Note = lines[8];
-                for (int i = ApexConstants.PatientFieldsCount; i < ApexConstants.PatientFieldsCount + ApexConstants.DiagnCount; i++)
+                for (int i = PolyConstants.PatientFieldsCount; i < PolyConstants.PatientFieldsCount + PolyConstants.DiagnCount; i++)
                 {
-                    Data.DiagnArray[i - ApexConstants.PatientFieldsCount] = lines[i] == SignSelected;
+                    Data.DiagnArray[i - PolyConstants.PatientFieldsCount] = lines[i] == SignSelected;
                 }
             }
             catch (Exception)
@@ -129,34 +129,34 @@ namespace ApexCardio
             lines[6] = AddItemName(insertTabs, 6, Data.Weight.ToString());
             lines[7] = AddItemName(insertTabs, 7, Data.ABP[0].ToString() + ABPseparator + Data.ABP[1].ToString());
             lines[8] = AddItemName(insertTabs, 8, Data.Note);
-            for (int i = 0; i < ApexConstants.DiagnCount; i++)
+            for (int i = 0; i < PolyConstants.DiagnCount; i++)
             {
                 string s;
                 s = Data.DiagnArray[i] ? SignSelected : "";
-                lines[i + ApexConstants.PatientFieldsCount] = AddItemName(insertTabs, i + ApexConstants.PatientFieldsCount, s); 
+                lines[i + PolyConstants.PatientFieldsCount] = AddItemName(insertTabs, i + PolyConstants.PatientFieldsCount, s); 
             }
             return lines;
         }
 
-        public void Save(ApexConfig cfg)
+        public void Save(PolyConfig cfg)
         {
             string[] lines = GetRecInfo(true);
             System.IO.File.WriteAllLines(FileName, lines, Encoding.Default);
-            string[] reserved = new string[ApexConstants.ReservedCount];
+            string[] reserved = new string[PolyConstants.ReservedCount];
             for (int i = 0; i < reserved.Length; i++)
             {
-                reserved[i] = ApexStrings.txReserved;
+                reserved[i] = PolyStrings.txReserved;
             }
             System.IO.File.AppendAllLines(FileName, reserved, Encoding.Default);
             string[] snames = new string[1];
-            for (int i = 0; i < ApexConstants.NumOfChannels + 1; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels + 1; i++)
             {
                 snames[0] = snames[0] + ColumnNames[i] + Convert.ToChar(9);
             }
             File.AppendAllLines(FileName, snames, Encoding.Default);
             string[] sEnabled = new string[1];
             sEnabled[0] =  "" + Convert.ToChar(9);
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 string s = cfg.VisibleGraphs[i] ? "V" : "X";
                 sEnabled[0] = sEnabled[0] + s + Convert.ToChar(9);

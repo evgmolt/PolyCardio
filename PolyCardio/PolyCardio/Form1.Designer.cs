@@ -1,4 +1,4 @@
-﻿namespace ApexCardio
+﻿namespace PolyCardio
 {
     partial class Form1
     {
@@ -36,13 +36,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.butPumpsStop = new System.Windows.Forms.Button();
             this.butPumpsStart = new System.Windows.Forms.Button();
-            this.labBP2 = new System.Windows.Forms.Label();
-            this.labBP1 = new System.Windows.Forms.Label();
-            this.butBPabort2 = new System.Windows.Forms.Button();
-            this.butBPmeas2 = new System.Windows.Forms.Button();
             this.labStatus = new System.Windows.Forms.Label();
-            this.butBPabort1 = new System.Windows.Forms.Button();
-            this.butBPMeas1 = new System.Windows.Forms.Button();
             this.butNewRecord = new System.Windows.Forms.Button();
             this.pbRecordProgress = new System.Windows.Forms.ProgressBar();
             this.butPump2stop = new System.Windows.Forms.Button();
@@ -72,14 +66,10 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.timerDelay = new System.Windows.Forms.Timer(this.components);
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.butAnalyze = new System.Windows.Forms.Button();
-            this.butReset = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.panelButtons.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numUDplevel2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numUDplevel1)).BeginInit();
-            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // timerRead
@@ -98,7 +88,6 @@
             this.tableLayoutPanel1.Controls.Add(this.hScrollBar1, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.labConnected, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.panelAmp, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.panel1, 2, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -123,13 +112,7 @@
             this.panelButtons.Controls.Add(this.label1);
             this.panelButtons.Controls.Add(this.butPumpsStop);
             this.panelButtons.Controls.Add(this.butPumpsStart);
-            this.panelButtons.Controls.Add(this.labBP2);
-            this.panelButtons.Controls.Add(this.labBP1);
-            this.panelButtons.Controls.Add(this.butBPabort2);
-            this.panelButtons.Controls.Add(this.butBPmeas2);
             this.panelButtons.Controls.Add(this.labStatus);
-            this.panelButtons.Controls.Add(this.butBPabort1);
-            this.panelButtons.Controls.Add(this.butBPMeas1);
             this.panelButtons.Controls.Add(this.butNewRecord);
             this.panelButtons.Controls.Add(this.pbRecordProgress);
             this.panelButtons.Controls.Add(this.butPump2stop);
@@ -186,44 +169,6 @@
             this.butPumpsStart.UseVisualStyleBackColor = true;
             this.butPumpsStart.Click += new System.EventHandler(this.butPumpsStart_Click);
             // 
-            // labBP2
-            // 
-            this.labBP2.AutoSize = true;
-            this.labBP2.Location = new System.Drawing.Point(192, 101);
-            this.labBP2.Name = "labBP2";
-            this.labBP2.Size = new System.Drawing.Size(37, 13);
-            this.labBP2.TabIndex = 29;
-            this.labBP2.Text = "ABP 2";
-            // 
-            // labBP1
-            // 
-            this.labBP1.AutoSize = true;
-            this.labBP1.Location = new System.Drawing.Point(192, 72);
-            this.labBP1.Name = "labBP1";
-            this.labBP1.Size = new System.Drawing.Size(37, 13);
-            this.labBP1.TabIndex = 28;
-            this.labBP1.Text = "ABP 1";
-            // 
-            // butBPabort2
-            // 
-            this.butBPabort2.Location = new System.Drawing.Point(99, 96);
-            this.butBPabort2.Name = "butBPabort2";
-            this.butBPabort2.Size = new System.Drawing.Size(75, 23);
-            this.butBPabort2.TabIndex = 27;
-            this.butBPabort2.Text = "Abort ABP";
-            this.butBPabort2.UseVisualStyleBackColor = true;
-            this.butBPabort2.Click += new System.EventHandler(this.butBPabort2_Click);
-            // 
-            // butBPmeas2
-            // 
-            this.butBPmeas2.Location = new System.Drawing.Point(13, 96);
-            this.butBPmeas2.Name = "butBPmeas2";
-            this.butBPmeas2.Size = new System.Drawing.Size(75, 23);
-            this.butBPmeas2.TabIndex = 26;
-            this.butBPmeas2.Text = "Start ABP 2";
-            this.butBPmeas2.UseVisualStyleBackColor = true;
-            this.butBPmeas2.Click += new System.EventHandler(this.butBPmeas2_Click);
-            // 
             // labStatus
             // 
             this.labStatus.AutoSize = true;
@@ -232,26 +177,6 @@
             this.labStatus.Size = new System.Drawing.Size(35, 13);
             this.labStatus.TabIndex = 25;
             this.labStatus.Text = "label1";
-            // 
-            // butBPabort1
-            // 
-            this.butBPabort1.Location = new System.Drawing.Point(99, 67);
-            this.butBPabort1.Name = "butBPabort1";
-            this.butBPabort1.Size = new System.Drawing.Size(75, 23);
-            this.butBPabort1.TabIndex = 24;
-            this.butBPabort1.Text = "Abort ABP";
-            this.butBPabort1.UseVisualStyleBackColor = true;
-            this.butBPabort1.Click += new System.EventHandler(this.butBPabort_Click);
-            // 
-            // butBPMeas1
-            // 
-            this.butBPMeas1.Location = new System.Drawing.Point(13, 67);
-            this.butBPMeas1.Name = "butBPMeas1";
-            this.butBPMeas1.Size = new System.Drawing.Size(75, 23);
-            this.butBPMeas1.TabIndex = 23;
-            this.butBPMeas1.Text = "Start ABP 1";
-            this.butBPMeas1.UseVisualStyleBackColor = true;
-            this.butBPMeas1.Click += new System.EventHandler(this.butBPMeas_Click);
             // 
             // butNewRecord
             // 
@@ -510,38 +435,6 @@
             this.timerDelay.Interval = 1000;
             this.timerDelay.Tick += new System.EventHandler(this.timerDelay_Tick);
             // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.butReset);
-            this.panel1.Controls.Add(this.butAnalyze);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(343, 465);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(498, 34);
-            this.panel1.TabIndex = 5;
-            // 
-            // butAnalyze
-            // 
-            this.butAnalyze.Enabled = false;
-            this.butAnalyze.Location = new System.Drawing.Point(3, 1);
-            this.butAnalyze.Name = "butAnalyze";
-            this.butAnalyze.Size = new System.Drawing.Size(75, 23);
-            this.butAnalyze.TabIndex = 0;
-            this.butAnalyze.Text = "Analyze";
-            this.butAnalyze.UseVisualStyleBackColor = true;
-            this.butAnalyze.Click += new System.EventHandler(this.butAnalyze_Click);
-            // 
-            // butReset
-            // 
-            this.butReset.Enabled = false;
-            this.butReset.Location = new System.Drawing.Point(84, 1);
-            this.butReset.Name = "butReset";
-            this.butReset.Size = new System.Drawing.Size(75, 23);
-            this.butReset.TabIndex = 1;
-            this.butReset.Text = "Reset";
-            this.butReset.UseVisualStyleBackColor = true;
-            this.butReset.Click += new System.EventHandler(this.butReset_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -558,7 +451,6 @@
             this.panelButtons.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numUDplevel2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numUDplevel1)).EndInit();
-            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -596,21 +488,12 @@
         private System.Windows.Forms.Button butPump1start;
         private System.Windows.Forms.ProgressBar pbRecordProgress;
         private System.Windows.Forms.Button butNewRecord;
-        private System.Windows.Forms.Button butBPMeas1;
-        private System.Windows.Forms.Button butBPabort1;
         private System.Windows.Forms.Label labStatus;
-        private System.Windows.Forms.Button butBPabort2;
-        private System.Windows.Forms.Button butBPmeas2;
-        private System.Windows.Forms.Label labBP2;
-        private System.Windows.Forms.Label labBP1;
         private System.Windows.Forms.Button butPumpsStop;
         private System.Windows.Forms.Button butPumpsStart;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.Timer timerDelay;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button butReset;
-        private System.Windows.Forms.Button butAnalyze;
     }
 }
 

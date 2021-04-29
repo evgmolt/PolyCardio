@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace ApexCardio
+namespace PolyCardio
 {
-    public class ApexConfig
+    public class PolyConfig
     {
         public string DataDir { get; set; } 
         public int DataFileNum { get; set; }
@@ -29,9 +29,9 @@ namespace ApexCardio
         public bool[] VisibleGraphs { get; set; }
 
 
-        public ApexConfig()
+        public PolyConfig()
         {
-            VisibleGraphs = new bool[ApexConstants.NumOfChannels];
+            VisibleGraphs = new bool[PolyConstants.NumOfChannels];
             DataDir = Directory.GetCurrentDirectory() + @"\Data\";
             DataFileNum = 0;
             CreateTextFile = true;
@@ -49,36 +49,36 @@ namespace ApexCardio
             RecordLength = 10;
             FilterOn = true;
             StartDelay = 10;
-            for (int i = 0; i < ApexConstants.NumOfChannels; i++)
+            for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 VisibleGraphs[i] = true;
             }
         }
 
-        public static ApexConfig GetConfig()
+        public static PolyConfig GetConfig()
         {
-            ApexConfig ac;
+            PolyConfig ac;
             JsonSerializer serializer = new JsonSerializer();
                 try
                 {
-                    using (StreamReader sr = new StreamReader(ApexConstants.ConfigFileName))
+                    using (StreamReader sr = new StreamReader(PolyConstants.ConfigFileName))
                     using (JsonReader reader = new JsonTextReader(sr))
                     {
-                        ac = (ApexConfig)serializer.Deserialize(reader, typeof(ApexConfig));
+                        ac = (PolyConfig)serializer.Deserialize(reader, typeof(PolyConfig));
                         return ac;
                     }
                 }
                 catch (Exception)
                 {
-                    ac = new ApexConfig();
+                    ac = new PolyConfig();
                     SaveConfig(ac);
                     return ac;
                 }
         }
 
-        public static void SaveConfig(ApexConfig cfg)
+        public static void SaveConfig(PolyConfig cfg)
         {
-            StreamWriter sw = new StreamWriter(ApexConstants.ConfigFileName);
+            StreamWriter sw = new StreamWriter(PolyConstants.ConfigFileName);
             JsonWriter writer = new JsonTextWriter(sw);
             JsonSerializer serializer = new JsonSerializer();
             serializer.Serialize(writer, cfg);

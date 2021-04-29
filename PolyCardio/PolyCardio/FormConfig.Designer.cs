@@ -1,4 +1,4 @@
-﻿namespace ApexCardio
+﻿namespace PolyCardio
 {
     partial class FormConfig
     {
@@ -139,7 +139,7 @@
             this.checkBox7.Name = "checkBox7";
             this.checkBox7.Size = new System.Drawing.Size(105, 17);
             this.checkBox7.TabIndex = 8;
-            this.checkBox7.Text = "Apex cardiogram";
+            this.checkBox7.Text = "Poly cardiogram";
             this.checkBox7.UseVisualStyleBackColor = true;
             // 
             // label1

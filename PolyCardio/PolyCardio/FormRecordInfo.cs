@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace ApexCardio
+namespace PolyCardio
 {
     public partial class FormRecordInfo : Form
     {
@@ -20,9 +20,9 @@ namespace ApexCardio
             recInfo = recInfoArg;
 
             clbDiagn.Items.Clear();
-            for (int i = 0; i < ApexConstants.DiagnCount; i++)
+            for (int i = 0; i < PolyConstants.DiagnCount; i++)
             {
-                clbDiagn.Items.Add(recInfo.Data.ItemNames[i + ApexConstants.PatientFieldsCount]);
+                clbDiagn.Items.Add(recInfo.Data.ItemNames[i + PolyConstants.PatientFieldsCount]);
                 clbDiagn.SetItemChecked(i, recInfo.Data.DiagnArray[i]);
             }
             labDateTime.Text = recInfo.Data.Date.ToString();
@@ -44,7 +44,7 @@ namespace ApexCardio
             recInfo.Data.Height = nudHeight.Value;
             recInfo.Data.Weight = nudWeight.Value;
             recInfo.Data.Note = tbComment.Text;
-            for (int i = 0; i < ApexConstants.DiagnCount; i++)
+            for (int i = 0; i < PolyConstants.DiagnCount; i++)
             {
                 recInfo.Data.DiagnArray[i] = clbDiagn.GetItemChecked(i);
             }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace ApexCardio
+namespace PolyCardio
 {
 
     public interface IMessageHandler
@@ -89,7 +89,7 @@ namespace ApexCardio
                     }
                 }
 
-                ReadTimer.Change(0, ApexConstants.USBTimerInterval);
+                ReadTimer.Change(0, PolyConstants.USBTimerInterval);
                 CurrentPort = i;
                 break;
             }

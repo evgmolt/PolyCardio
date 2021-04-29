@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApexCardio
+namespace PolyCardio
 {
 
     public static class Filter
