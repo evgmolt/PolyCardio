@@ -19,20 +19,17 @@ namespace PolyCardio
             InitializeComponent();
             cfg = cfgarg;
             CBArr = new CheckBox[PolyConstants.NumOfChannels];
-            CBArr[0] = checkBox1;
-            CBArr[1] = checkBox2;
-            CBArr[2] = checkBox3;
-            CBArr[3] = checkBox4;
-            CBArr[4] = checkBox5;
-            CBArr[5] = checkBox6;
-            CBArr[6] = checkBox7;
+            CBArr[0] = checkBoxECG;
+            CBArr[1] = checkBoxReo;
+            CBArr[2] = checkBoxSphigmo1;
+            CBArr[3] = checkBoxSphigmo2;
+            CBArr[4] = checkBoxApex;
             for (int i = 0; i < PolyConstants.NumOfChannels; i++)
             {
                 CBArr[i].Checked = cfg.VisibleGraphs[i];
             }
             numUDRecLen.Value = cfg.RecordLength;
             numUDStartDelay.Value = cfg.StartDelay;
-            tbArcPath.Text = cfg.ArchiverPath;
             CB_Filter.Checked = cfg.FilterOn;
         }
 
@@ -49,7 +46,6 @@ namespace PolyCardio
             }
             cfg.RecordLength = (int)numUDRecLen.Value;
             cfg.StartDelay = (int)numUDStartDelay.Value;
-            cfg.ArchiverPath = tbArcPath.Text;
             cfg.FilterOn = CB_Filter.Checked;
         }
 
@@ -57,18 +53,5 @@ namespace PolyCardio
         {
 
         }
-
-        private void butSelectArcPath_Click(object sender, EventArgs e)
-        {
-            folderBrowserDialog1.ShowNewFolderButton = true;
-            folderBrowserDialog1.SelectedPath = cfg.ArchiverPath;
-
-            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
-            {
-                tbArcPath.Text = folderBrowserDialog1.SelectedPath + @"\";
-            }
-
-        }
-
     }
 }

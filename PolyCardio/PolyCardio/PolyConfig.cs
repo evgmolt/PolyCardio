@@ -12,15 +12,9 @@ namespace PolyCardio
         public string DataDir { get; set; } 
         public int DataFileNum { get; set; }
         public bool CreateTextFile { get; set; } 
-        public string SMTPHost { get; set; } 
-        public string Password { get; set; } 
-        public string Port { get; set; }   
-        public string MailTo { get; set; }   
-        public string MailFrom { get; set; } 
         public bool Maximized { get; set; }  
         public int WindowWidth { get; set; } 
         public int WindowHeight { get; set; } 
-        public string ArchiverPath { get; set; }  
         public byte PressLevel1 { get; set; }  
         public byte PressLevel2 { get; set; } 
         public int RecordLength { get; set; }
@@ -35,15 +29,9 @@ namespace PolyCardio
             DataDir = Directory.GetCurrentDirectory() + @"\Data\";
             DataFileNum = 0;
             CreateTextFile = true;
-            SMTPHost = "smtp.yandex.ru";
-            Password = "rfatlhck,c";
-            Port = "25";
-            MailTo = "lbs.data@yandex.ru";
-            MailFrom = "lbs.data@yandex.ru";
             Maximized = true;
             WindowWidth = 800;
             WindowHeight = 500;
-            ArchiverPath = Directory.GetCurrentDirectory() + @"\";
             PressLevel1 = 50;
             PressLevel2 = 50;
             RecordLength = 10;

@@ -42,10 +42,8 @@ namespace PolyCardio
         FileStream filestream;
         StreamWriter textWriter;
         private string CurrentFile;
-        private RecordInfo CurrentRecordInfo;
         private bool DataReadyToSave = false;
         private int DelayCounter;
-//        private bool PaintAver = false;
     
         public Form1()
         {
@@ -116,13 +114,11 @@ namespace PolyCardio
 
         void LineReceived(object sender, EventArgs arg)
         {
-            labP1.Text = (DataA.ReoArray[decomposer.MainIndex]).ToString();
             labP3.Text = (DataA.ECGArray[decomposer.MainIndex]).ToString();
 
 //            labP1.Text = (DataA.Sphigmo1Array[decomposer.MainIndex] / k).ToString();
 //            labP2.Text = (DataA.Sphigmo2Array[decomposer.MainIndex] / k).ToString();
 //            labP3.Text = (DataA.PolyArray[decomposer.MainIndex] / k).ToString();
-            labStatus.Text = Convert.ToString(decomposer.Status, 2);
         }
 
         void NewLineReceived(object sender, EventArgs agr)
@@ -166,12 +162,16 @@ namespace PolyCardio
                 GraphicsInfo gi = GInfoArr[i];
                 if (gi.Visible)
                 {
-                    gi.LabName = new Label();
-                    gi.LabName.Location = new Point(space, Y);
-                    gi.LabName.Text = ChannelsNames[i]; 
-                    gi.BufPanel = new BufferedPanel(i);
-                    gi.BufPanel.Cursor = Cursors.Cross;
-                    gi.BufPanel.Location = new Point(space, Y + space);
+                    gi.LabName = new Label
+                    {
+                        Location = new Point(space, Y),
+                        Text = ChannelsNames[i]
+                    };
+                    gi.BufPanel = new BufferedPanel(i)
+                    {
+                        Cursor = Cursors.Cross,
+                        Location = new Point(space, Y + space)
+                    };
                     Y = Y + singleHeight + space;
                     gi.BufPanel.Size = new Size(panelGraph.Width - space, singleHeight);
                     if (i == 0) gi.BufPanel.Paint += bufferedPanel0_Paint;
@@ -430,9 +430,7 @@ namespace PolyCardio
             if (decomposer != null)
             {
                 butNewRecord.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
-                butStartRecord.Enabled = Connected & !decomposer.RecordStarted & !ViewMode & decomposer.DeviceTurnedOn & CurrentRecordInfo != null;
-                butFlow.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
-                butEditRecInfo.Enabled = CurrentRecordInfo != null & !decomposer.RecordStarted;
+                butStartRecord.Enabled = Connected & !decomposer.RecordStarted & !ViewMode & decomposer.DeviceTurnedOn;                butFlow.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
                 butPump1start.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.Pump1Started;
                 butPump2start.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.Pump2Started; ;
                 butPump1stop.Enabled = Connected & decomposer.DeviceTurnedOn;
@@ -443,7 +441,6 @@ namespace PolyCardio
             else
             {
                 butFlow.Enabled = false;
-                butEditRecInfo.Enabled = CurrentRecordInfo != null;
             }
 
             if (USBPort == null)
@@ -484,33 +481,6 @@ namespace PolyCardio
 
         }
 
-        private void UpdateRecInfoBox(RecordInfo riarg)
-        {
-            textBoxRecInfo.Clear();
-//            textBoxRecInfo.Text += "Record information" + System.Environment.NewLine + System.Environment.NewLine;
-            textBoxRecInfo.Text += "File : " + Convert.ToChar(9) + Path.GetFileName(riarg.FileName) + System.Environment.NewLine;
-            string[] lines = riarg.GetRecInfo(true);
-/*            foreach (string line in lines)
-            {
-                textBoxRecInfo.Text += line + System.Environment.NewLine;
-            }*/
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string s;
-                if (i < PolyConstants.PatientFieldsCount)
-                {
-                    s = lines[i] + System.Environment.NewLine;
-                    textBoxRecInfo.Text += s;
-                }
-                else
-                    if (riarg.Data.DiagnArray[i - PolyConstants.PatientFieldsCount])
-                    {
-                        s = riarg.Data.ItemNames[i] + " ";
-                        textBoxRecInfo.Text += s;
-                    }
-            }
-            textBoxRecInfo.SelectionStart = 0;
-        }
 
         private void butNewRecord_Click(object sender, EventArgs e)
         {
@@ -523,20 +493,11 @@ namespace PolyCardio
                 Cfg.DataDir = Path.GetDirectoryName(saveFileDialog1.FileName) + @"\";
                 PolyConfig.SaveConfig(Cfg);
                 CurrentFile = Path.GetFileName(saveFileDialog1.FileName);
-                var ri = new RecordInfo(Cfg, CurrentFile);
-                ri.Data.Date = DateTime.Now;
-                ri.Save(Cfg);
-                UpdateRecInfoBox(ri);
-                CurrentRecordInfo = ri;
             }
         }
 
         private void StartRecord()
         {
-            CurrentRecordInfo.Data.Date = DateTime.Now;
-            CurrentRecordInfo.Save(Cfg);
-            UpdateRecInfoBox(CurrentRecordInfo);
-
             pbRecordProgress.Maximum = Cfg.RecordLength * ByteDecomposer.SamplingFrequency;
             //            string fname = String.Concat(Cfg.DataDir.ToString(), CurrentFile, PolyConstants.DataFileExtension);
             //            filestream = new FileStream(fname, FileMode.Create);
@@ -589,9 +550,6 @@ namespace PolyCardio
         {
             pbRecordProgress.Visible = false;
             labRecordSize.Visible = false;
-            CurrentRecordInfo.Data.Length = decomposer.TotalBytes / ByteDecomposer.BytesInBlock / ByteDecomposer.SamplingFrequency;
-            CurrentRecordInfo.Save(Cfg);
-            UpdateRecInfoBox(CurrentRecordInfo);
             decomposer.DecomposeLineEvent -= NewLineReceived;
             decomposer.DecomposeLineEvent -= LineReceived;
 //            String fname = filestream.Name;
@@ -601,7 +559,7 @@ namespace PolyCardio
 //            filestream.Dispose();
             if (textWriter != null) textWriter.Dispose();
             string[] lines = File.ReadAllLines(Cfg.DataDir.ToString() + PolyConstants.TmpTextFile);
-            File.AppendAllLines(CurrentRecordInfo.FileName, lines);
+            File.AppendAllLines(CurrentFile, lines);
 
             ViewMode = true;
             timerRead.Enabled = false;
@@ -636,46 +594,6 @@ namespace PolyCardio
             Cfg.DataFileNum++;
             PolyConfig.SaveConfig(Cfg);
             DataReadyToSave = false;
-            CurrentRecordInfo = null;
-            textBoxRecInfo.Clear();
-        }
-
-        
-
-        private void EditRecInfo()
-        {
-            if (decomposer == null) return;
-            if (decomposer.RecordStarted)
-            {
-                if (textBoxRecInfo.Text.Length == 0) return;
-                textBoxRecInfo.SelectionStart = 0;
-                var ri = new RecordInfo(Cfg, CurrentFile);
-                var fri = new FormRecordInfo(ri);
-                if (fri.ShowDialog() == DialogResult.OK)
-                {
-                    ri = fri.GetDialogData();
-                    ri.Save(Cfg);
-                    UpdateRecInfoBox(ri);
-                }
-                fri.Dispose();
-            }
-            else
-            {
-                string[] lines = File.ReadAllLines(Cfg.DataDir.ToString() + CurrentFile, Encoding.Default);
-                string[] ldata = lines.Skip(PolyConstants.HeaderSize).ToArray();
-                string[] lrec = lines.Take(PolyConstants.HeaderSize).ToArray();
-                var ri = new RecordInfo(Cfg, CurrentFile, lrec);
-                var fri = new FormRecordInfo(ri);
-                if (fri.ShowDialog() == DialogResult.OK)
-                {
-                    ri = fri.GetDialogData();
-                    ri.Save(Cfg);
-                    UpdateRecInfoBox(ri);
-                }
-                CurrentRecordInfo = ri;
-                File.AppendAllLines(ri.FileName, ldata);
-                fri.Dispose();
-            }
         }
 
         private void trackBarECG_ValueChanged(object sender, EventArgs e)
@@ -743,7 +661,6 @@ namespace PolyCardio
         {
             openFileDialog1.FileName = "";
             openFileDialog1.InitialDirectory = Cfg.DataDir.ToString();
-            textBoxRecInfo.SelectionStart = 0;
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 if (File.Exists(openFileDialog1.FileName))
@@ -755,9 +672,6 @@ namespace PolyCardio
                     timerRead.Enabled = false;
 
                     CurrentFile = Path.GetFileName(openFileDialog1.FileName);
-                    var ri = new RecordInfo(Cfg, CurrentFile);
-                    UpdateRecInfoBox(ri);
-                    CurrentRecordInfo = ri;
 
                     string[] lines = File.ReadAllLines(openFileDialog1.FileName);
                     int size = lines.Count() - PolyConstants.HeaderSize;
@@ -777,8 +691,6 @@ namespace PolyCardio
                     {
                         if (gi.Visible) gi.BufPanel.Refresh();
                     }
-                    textBoxRecInfo.SelectionStart = 0;
-                    
                 }
             }
 
@@ -828,12 +740,6 @@ namespace PolyCardio
             ViewShift = hScrollBar1.Value;
         }
 
-        private void butEditRecInfo_Click(object sender, EventArgs e)
-        {
-            EditRecInfo();
-        }
-
- 
         private void numUDplevel1_ValueChanged(object sender, EventArgs e)
         {
             Cfg.PressLevel1 = (byte)numUDplevel1.Value;

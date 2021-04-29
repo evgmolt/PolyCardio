@@ -30,20 +30,15 @@
         {
             this.butOk = new System.Windows.Forms.Button();
             this.butCancel = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
-            this.checkBox6 = new System.Windows.Forms.CheckBox();
-            this.checkBox7 = new System.Windows.Forms.CheckBox();
+            this.checkBoxECG = new System.Windows.Forms.CheckBox();
+            this.checkBoxReo = new System.Windows.Forms.CheckBox();
+            this.checkBoxSphigmo1 = new System.Windows.Forms.CheckBox();
+            this.checkBoxSphigmo2 = new System.Windows.Forms.CheckBox();
+            this.checkBoxApex = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.numUDRecLen = new System.Windows.Forms.NumericUpDown();
-            this.label3 = new System.Windows.Forms.Label();
-            this.tbArcPath = new System.Windows.Forms.TextBox();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.butSelectArcPath = new System.Windows.Forms.Button();
             this.CB_Filter = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.numUDStartDelay = new System.Windows.Forms.NumericUpDown();
@@ -72,75 +67,55 @@
             this.butCancel.Text = "Cancel";
             this.butCancel.UseVisualStyleBackColor = true;
             // 
-            // checkBox1
+            // checkBoxECG
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(12, 30);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(57, 17);
-            this.checkBox1.TabIndex = 2;
-            this.checkBox1.Text = "ECG 1";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBoxECG.AutoSize = true;
+            this.checkBoxECG.Location = new System.Drawing.Point(12, 30);
+            this.checkBoxECG.Name = "checkBoxECG";
+            this.checkBoxECG.Size = new System.Drawing.Size(57, 17);
+            this.checkBoxECG.TabIndex = 2;
+            this.checkBoxECG.Text = "ECG 1";
+            this.checkBoxECG.UseVisualStyleBackColor = true;
             // 
-            // checkBox2
+            // checkBoxReo
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(12, 53);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(57, 17);
-            this.checkBox2.TabIndex = 3;
-            this.checkBox2.Text = "ECG 2";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBoxReo.AutoSize = true;
+            this.checkBoxReo.Location = new System.Drawing.Point(12, 50);
+            this.checkBoxReo.Name = "checkBoxReo";
+            this.checkBoxReo.Size = new System.Drawing.Size(69, 17);
+            this.checkBoxReo.TabIndex = 4;
+            this.checkBoxReo.Text = "Reogram";
+            this.checkBoxReo.UseVisualStyleBackColor = true;
             // 
-            // checkBox3
+            // checkBoxSphigmo1
             // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(12, 76);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(78, 17);
-            this.checkBox3.TabIndex = 4;
-            this.checkBox3.Text = "Reogram 1";
-            this.checkBox3.UseVisualStyleBackColor = true;
+            this.checkBoxSphigmo1.AutoSize = true;
+            this.checkBoxSphigmo1.Location = new System.Drawing.Point(12, 73);
+            this.checkBoxSphigmo1.Name = "checkBoxSphigmo1";
+            this.checkBoxSphigmo1.Size = new System.Drawing.Size(99, 17);
+            this.checkBoxSphigmo1.TabIndex = 6;
+            this.checkBoxSphigmo1.Text = "Sphigmogram 1";
+            this.checkBoxSphigmo1.UseVisualStyleBackColor = true;
             // 
-            // checkBox4
+            // checkBoxSphigmo2
             // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(12, 99);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(78, 17);
-            this.checkBox4.TabIndex = 5;
-            this.checkBox4.Text = "Reogram 2";
-            this.checkBox4.UseVisualStyleBackColor = true;
+            this.checkBoxSphigmo2.AutoSize = true;
+            this.checkBoxSphigmo2.Location = new System.Drawing.Point(12, 96);
+            this.checkBoxSphigmo2.Name = "checkBoxSphigmo2";
+            this.checkBoxSphigmo2.Size = new System.Drawing.Size(99, 17);
+            this.checkBoxSphigmo2.TabIndex = 7;
+            this.checkBoxSphigmo2.Text = "Sphigmogram 2";
+            this.checkBoxSphigmo2.UseVisualStyleBackColor = true;
             // 
-            // checkBox5
+            // checkBoxApex
             // 
-            this.checkBox5.AutoSize = true;
-            this.checkBox5.Location = new System.Drawing.Point(12, 122);
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(99, 17);
-            this.checkBox5.TabIndex = 6;
-            this.checkBox5.Text = "Sphigmogram 1";
-            this.checkBox5.UseVisualStyleBackColor = true;
-            // 
-            // checkBox6
-            // 
-            this.checkBox6.AutoSize = true;
-            this.checkBox6.Location = new System.Drawing.Point(12, 145);
-            this.checkBox6.Name = "checkBox6";
-            this.checkBox6.Size = new System.Drawing.Size(99, 17);
-            this.checkBox6.TabIndex = 7;
-            this.checkBox6.Text = "Sphigmogram 2";
-            this.checkBox6.UseVisualStyleBackColor = true;
-            // 
-            // checkBox7
-            // 
-            this.checkBox7.AutoSize = true;
-            this.checkBox7.Location = new System.Drawing.Point(12, 168);
-            this.checkBox7.Name = "checkBox7";
-            this.checkBox7.Size = new System.Drawing.Size(105, 17);
-            this.checkBox7.TabIndex = 8;
-            this.checkBox7.Text = "Poly cardiogram";
-            this.checkBox7.UseVisualStyleBackColor = true;
+            this.checkBoxApex.AutoSize = true;
+            this.checkBoxApex.Location = new System.Drawing.Point(12, 119);
+            this.checkBoxApex.Name = "checkBoxApex";
+            this.checkBoxApex.Size = new System.Drawing.Size(105, 17);
+            this.checkBoxApex.TabIndex = 8;
+            this.checkBoxApex.Text = "Apex cardiogram";
+            this.checkBoxApex.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
@@ -181,32 +156,6 @@
             0,
             0,
             0});
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 277);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(84, 13);
-            this.label3.TabIndex = 12;
-            this.label3.Text = "Archiver 7z path";
-            // 
-            // tbArcPath
-            // 
-            this.tbArcPath.Location = new System.Drawing.Point(112, 274);
-            this.tbArcPath.Name = "tbArcPath";
-            this.tbArcPath.Size = new System.Drawing.Size(329, 20);
-            this.tbArcPath.TabIndex = 13;
-            // 
-            // butSelectArcPath
-            // 
-            this.butSelectArcPath.Location = new System.Drawing.Point(447, 272);
-            this.butSelectArcPath.Name = "butSelectArcPath";
-            this.butSelectArcPath.Size = new System.Drawing.Size(28, 23);
-            this.butSelectArcPath.TabIndex = 14;
-            this.butSelectArcPath.Text = "...";
-            this.butSelectArcPath.UseVisualStyleBackColor = true;
-            this.butSelectArcPath.Click += new System.EventHandler(this.butSelectArcPath_Click);
             // 
             // CB_Filter
             // 
@@ -249,19 +198,14 @@
             this.Controls.Add(this.numUDStartDelay);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.CB_Filter);
-            this.Controls.Add(this.butSelectArcPath);
-            this.Controls.Add(this.tbArcPath);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.numUDRecLen);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.checkBox7);
-            this.Controls.Add(this.checkBox6);
-            this.Controls.Add(this.checkBox5);
-            this.Controls.Add(this.checkBox4);
-            this.Controls.Add(this.checkBox3);
-            this.Controls.Add(this.checkBox2);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.checkBoxApex);
+            this.Controls.Add(this.checkBoxSphigmo2);
+            this.Controls.Add(this.checkBoxSphigmo1);
+            this.Controls.Add(this.checkBoxReo);
+            this.Controls.Add(this.checkBoxECG);
             this.Controls.Add(this.butCancel);
             this.Controls.Add(this.butOk);
             this.KeyPreview = true;
@@ -278,20 +222,15 @@
 
         private System.Windows.Forms.Button butOk;
         private System.Windows.Forms.Button butCancel;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.CheckBox checkBox2;
-        private System.Windows.Forms.CheckBox checkBox3;
-        private System.Windows.Forms.CheckBox checkBox4;
-        private System.Windows.Forms.CheckBox checkBox5;
-        private System.Windows.Forms.CheckBox checkBox6;
-        private System.Windows.Forms.CheckBox checkBox7;
+        private System.Windows.Forms.CheckBox checkBoxECG;
+        private System.Windows.Forms.CheckBox checkBoxReo;
+        private System.Windows.Forms.CheckBox checkBoxSphigmo1;
+        private System.Windows.Forms.CheckBox checkBoxSphigmo2;
+        private System.Windows.Forms.CheckBox checkBoxApex;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown numUDRecLen;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox tbArcPath;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
-        private System.Windows.Forms.Button butSelectArcPath;
         private System.Windows.Forms.CheckBox CB_Filter;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown numUDStartDelay;

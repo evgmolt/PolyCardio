@@ -36,7 +36,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.butPumpsStop = new System.Windows.Forms.Button();
             this.butPumpsStart = new System.Windows.Forms.Button();
-            this.labStatus = new System.Windows.Forms.Label();
             this.butNewRecord = new System.Windows.Forms.Button();
             this.pbRecordProgress = new System.Windows.Forms.ProgressBar();
             this.butPump2stop = new System.Windows.Forms.Button();
@@ -49,11 +48,8 @@
             this.numUDplevel1 = new System.Windows.Forms.NumericUpDown();
             this.labP3 = new System.Windows.Forms.Label();
             this.labP2 = new System.Windows.Forms.Label();
-            this.labP1 = new System.Windows.Forms.Label();
-            this.butEditRecInfo = new System.Windows.Forms.Button();
             this.butFlow = new System.Windows.Forms.Button();
             this.butOpenFile = new System.Windows.Forms.Button();
-            this.textBoxRecInfo = new System.Windows.Forms.TextBox();
             this.labRecordSize = new System.Windows.Forms.Label();
             this.butSaveRecord = new System.Windows.Forms.Button();
             this.butStartRecord = new System.Windows.Forms.Button();
@@ -112,7 +108,6 @@
             this.panelButtons.Controls.Add(this.label1);
             this.panelButtons.Controls.Add(this.butPumpsStop);
             this.panelButtons.Controls.Add(this.butPumpsStart);
-            this.panelButtons.Controls.Add(this.labStatus);
             this.panelButtons.Controls.Add(this.butNewRecord);
             this.panelButtons.Controls.Add(this.pbRecordProgress);
             this.panelButtons.Controls.Add(this.butPump2stop);
@@ -125,11 +120,8 @@
             this.panelButtons.Controls.Add(this.numUDplevel1);
             this.panelButtons.Controls.Add(this.labP3);
             this.panelButtons.Controls.Add(this.labP2);
-            this.panelButtons.Controls.Add(this.labP1);
-            this.panelButtons.Controls.Add(this.butEditRecInfo);
             this.panelButtons.Controls.Add(this.butFlow);
             this.panelButtons.Controls.Add(this.butOpenFile);
-            this.panelButtons.Controls.Add(this.textBoxRecInfo);
             this.panelButtons.Controls.Add(this.labRecordSize);
             this.panelButtons.Controls.Add(this.butSaveRecord);
             this.panelButtons.Controls.Add(this.butStartRecord);
@@ -168,15 +160,6 @@
             this.butPumpsStart.Text = ">";
             this.butPumpsStart.UseVisualStyleBackColor = true;
             this.butPumpsStart.Click += new System.EventHandler(this.butPumpsStart_Click);
-            // 
-            // labStatus
-            // 
-            this.labStatus.AutoSize = true;
-            this.labStatus.Location = new System.Drawing.Point(116, 426);
-            this.labStatus.Name = "labStatus";
-            this.labStatus.Size = new System.Drawing.Size(35, 13);
-            this.labStatus.TabIndex = 25;
-            this.labStatus.Text = "label1";
             // 
             // butNewRecord
             // 
@@ -290,26 +273,6 @@
             this.labP2.Text = "P2";
             this.labP2.Visible = false;
             // 
-            // labP1
-            // 
-            this.labP1.AutoSize = true;
-            this.labP1.Location = new System.Drawing.Point(230, 423);
-            this.labP1.Name = "labP1";
-            this.labP1.Size = new System.Drawing.Size(20, 13);
-            this.labP1.TabIndex = 10;
-            this.labP1.Text = "P1";
-            this.labP1.Visible = false;
-            // 
-            // butEditRecInfo
-            // 
-            this.butEditRecInfo.Location = new System.Drawing.Point(17, 426);
-            this.butEditRecInfo.Name = "butEditRecInfo";
-            this.butEditRecInfo.Size = new System.Drawing.Size(75, 23);
-            this.butEditRecInfo.TabIndex = 2;
-            this.butEditRecInfo.Text = "Edit";
-            this.butEditRecInfo.UseVisualStyleBackColor = true;
-            this.butEditRecInfo.Click += new System.EventHandler(this.butEditRecInfo_Click);
-            // 
             // butFlow
             // 
             this.butFlow.Location = new System.Drawing.Point(13, 9);
@@ -329,16 +292,6 @@
             this.butOpenFile.Text = "OpenFile";
             this.butOpenFile.UseVisualStyleBackColor = true;
             this.butOpenFile.Click += new System.EventHandler(this.butOpenFile_Click);
-            // 
-            // textBoxRecInfo
-            // 
-            this.textBoxRecInfo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBoxRecInfo.Location = new System.Drawing.Point(17, 251);
-            this.textBoxRecInfo.Multiline = true;
-            this.textBoxRecInfo.Name = "textBoxRecInfo";
-            this.textBoxRecInfo.ReadOnly = true;
-            this.textBoxRecInfo.Size = new System.Drawing.Size(266, 169);
-            this.textBoxRecInfo.TabIndex = 7;
             // 
             // labRecordSize
             // 
@@ -443,7 +396,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.MinimumSize = new System.Drawing.Size(860, 540);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "PolyCardio";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -468,16 +421,13 @@
         private System.Windows.Forms.Button butStartRecord;
         private System.Windows.Forms.Timer timerStatus;
         private System.Windows.Forms.Label labRecordSize;
-        private System.Windows.Forms.TextBox textBoxRecInfo;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.HScrollBar hScrollBar1;
         private System.Windows.Forms.Panel panelAmp;
         private System.Windows.Forms.Button butOpenFile;
         private System.Windows.Forms.Button butFlow;
-        private System.Windows.Forms.Button butEditRecInfo;
         private System.Windows.Forms.Label labP3;
         private System.Windows.Forms.Label labP2;
-        private System.Windows.Forms.Label labP1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.NumericUpDown numUDplevel2;
         private System.Windows.Forms.Label label2;
@@ -488,7 +438,6 @@
         private System.Windows.Forms.Button butPump1start;
         private System.Windows.Forms.ProgressBar pbRecordProgress;
         private System.Windows.Forms.Button butNewRecord;
-        private System.Windows.Forms.Label labStatus;
         private System.Windows.Forms.Button butPumpsStop;
         private System.Windows.Forms.Button butPumpsStart;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
