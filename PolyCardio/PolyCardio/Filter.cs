@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace PolyCardio
 {
-
     public static class Filter
     {
-
-        public static readonly double[] coeff50 =  {+5.8055825294890924e-003, 
+        public static readonly double[] coeff50 =  {
+                                    +5.8055825294890924e-003, 
                                    -5.6110169116486645e-003, 
                                    -1.3295678981616035e-002, 
                                    +1.9963872393967758e-002, 
@@ -33,7 +32,8 @@ namespace PolyCardio
                                    +5.8055825294890924e-003 };
 
         //LPF_Fs125Hz_Fpass8Hz_Fstop14Hz
-        public static readonly double[] coeff14 = {+1.4955781797938609e-002, 
+        public static readonly double[] coeff14 = {
+                                    +1.4955781797938609e-002, 
                                     +2.4870721049448024e-002, 
                                     +4.1110724254332091e-002, 
                                     +5.9668660137318891e-002, 
@@ -50,20 +50,20 @@ namespace PolyCardio
                                     +1.4955781797938609e-002 };
 
 
-        public static int filter(double[] coeff, int[] inArr, uint ind)
+        public static int FilterForRun(double[] coeff, int[] inArr, uint ind)
         {
             double sum = 0;
             for (int i = 0; i < coeff.Length; i++)
             {
                 double a;
                 a = inArr[(ind - coeff.Length + i + 1) & (ByteDecomposer.DataArrSize - 1)];
-                a = a * coeff[i];
-                sum = sum + a;
+                a *= coeff[i];
+                sum += a;
             }
             return (int)Math.Round(sum);
         }
 
-        public static int filterForView(double[] coeff, int[] inArr, int ind)
+        public static int FilterForView(double[] coeff, int[] inArr, int ind)
         {
             if (ind < coeff.Length) return 0;
             double sum = 0;
@@ -71,8 +71,8 @@ namespace PolyCardio
             {
                 double a;
                 a = inArr[ind - coeff.Length + i + 1];
-                a = a * coeff[i];
-                sum = sum + a;
+                a *= coeff[i];
+                sum += a;
             }
             return (int)Math.Round(sum);
         }

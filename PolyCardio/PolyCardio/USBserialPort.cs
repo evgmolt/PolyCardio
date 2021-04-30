@@ -10,7 +10,6 @@ using System.Windows.Forms;
 
 namespace PolyCardio
 {
-
     public interface IMessageHandler
     {
         event Action<Message> WindowsMessage;
@@ -18,14 +17,16 @@ namespace PolyCardio
 
     public class USBserialPort
     {
-        public string[] PortNames;
-        public int CurrentPort;
         public SerialPort PortHandle;
+        public string[] PortNames;
         public byte[] PortBuf;
+        public int CurrentPort;
         public int BytesRead;
         public Boolean ReadEnabled;
-        System.Threading.Timer ReadTimer;
-        private int BaudRate;
+        readonly System.Threading.Timer ReadTimer;
+
+        private readonly int _portBufSize = 1000;
+        private readonly int _baudRate;
 
         public event Action<Exception> ConnectionFailure;
 
@@ -43,10 +44,10 @@ namespace PolyCardio
         
         public USBserialPort(IMessageHandler messageHandler, int baudrate)
         {
-            BaudRate = baudrate;
-            messageHandler.WindowsMessage += onMessage;
+            _baudRate = baudrate;
+            messageHandler.WindowsMessage += OnMessage;
             ReadEnabled = false;
-            PortBuf = new byte[10000];
+            PortBuf = new byte[_portBufSize];
             ReadTimer = new System.Threading.Timer(ReadPort, null, 0, Timeout.Infinite);
         }
 
@@ -57,7 +58,9 @@ namespace PolyCardio
             try
             {
                 if (PortHandle != null)
+                {
                     PortHandle.Write(buf, 0, 1);
+                }
                 return true;
             }
             catch (Exception)
@@ -72,10 +75,12 @@ namespace PolyCardio
             if (PortNames == null) return;
             for (int i = 0; i < PortNames.Count(); i++)
             {
-                PortHandle = new SerialPort(PortNames[i], BaudRate);
-                PortHandle.DataBits = 8;
-                PortHandle.Parity = Parity.None;
-                PortHandle.StopBits = StopBits.One;
+                PortHandle = new SerialPort(PortNames[i], _baudRate)
+                {
+                    DataBits = 8,
+                    Parity = Parity.None,
+                    StopBits = StopBits.One
+                };
                 ReadEnabled = true;
                 try
                 {
@@ -83,10 +88,7 @@ namespace PolyCardio
                 }
                 catch (Exception e)
                 {
-                    if (ConnectionFailure != null)
-                    {
-                        ConnectionFailure(e);
-                    }
+                    ConnectionFailure?.Invoke(e);
                 }
 
                 ReadTimer.Change(0, PolyConstants.USBTimerInterval);
@@ -125,7 +127,7 @@ namespace PolyCardio
             return pn;
         }
 
-        private void onMessage(Message m)
+        private void OnMessage(Message m)
         {
             if (PortHandle == null)
             {

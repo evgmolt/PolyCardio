@@ -7,172 +7,92 @@ using System.Text;
 
 namespace PolyCardio
 {
-    public class DataArrays
-    {
-        public int[] ECGArray;
-        public int[] ReoArray;
-        public int[] Sphigmo1Array;
-        public int[] Sphigmo2Array;
-        public int[] ApexArray;
-
-        public double[] AverECG;
-        public double[] AverReo;
-        public double[] AverSphigmo1;
-        public double[] AverSphigmo2;
-        public double[] AverApex;
-
-        public List<double[]> AverList;
-
-        private int AverArrSize = 256;
-        
-        public int[] ECGViewArray;
-        public int[] ReoViewArray;
-        public int[] Sphigmo1ViewArray;
-        public int[] Sphigmo2ViewArray;
-        public int[] ApexViewArray;
-
-        public List<int[]> ViewList;
-        
-        private const int RRMaxNum = 1000;
-        public int[] RArray;
-        public int RInd;
-
-    public DataArrays(int size)
-        {
-            ECGArray = new int[size];
-            ReoArray = new int[size];
-            Sphigmo1Array = new int[size];
-            Sphigmo2Array = new int[size];
-            ApexArray = new int[size];
-
-            AverECG = new double[AverArrSize];
-            AverReo = new double[AverArrSize];
-            AverSphigmo1 = new double[AverArrSize];
-            AverSphigmo2 = new double[AverArrSize];
-            AverApex = new double[AverArrSize];
-
-            AverList = new List<double[]>();
-            AverList.Add(AverECG);
-            AverList.Add(AverReo);
-            AverList.Add(AverSphigmo1);
-            AverList.Add(AverSphigmo2);
-            AverList.Add(AverApex);
-
-            ECGViewArray = new int[size];
-            ReoViewArray = new int[size];
-            Sphigmo1ViewArray = new int[size];
-            Sphigmo2ViewArray = new int[size];
-            ApexViewArray = new int[size];
-
-            ViewList = new List<int[]>();
-            ViewList.Add(ECGViewArray);
-            ViewList.Add(ReoViewArray);
-            ViewList.Add(Sphigmo1ViewArray);
-            ViewList.Add(Sphigmo2ViewArray);
-            ViewList.Add(ApexViewArray);
-
-            RArray = new int[RRMaxNum];
-            RInd = 0;
-        }
-    }
-
     class ByteDecomposer
     {
-        public bool Calibrate;
+        public DataArrays Data;
         public event EventHandler DecomposeLineEvent;
         public event EventHandler ConnectionBreakdown;
-
         public const int SamplingFrequency = 125;
-
-        public DataArrays Data;
-        private const byte Marker1 = 0x19;
         public const int DataArrSize = 0x100000;
         public const int DataArrSizeForView = 4000;
+        public const int BytesInBlock = 27;
 
-        public const byte bp1completed = 1;
-        public const byte bp2completed = 2;
-        public const byte bp1error = 4;
-        public const byte bp2error = 8;
-        public const byte bp1progress = 16;
-        public const byte bp2progress = 32;
         public const byte pump1progress = 64;
         public const byte pump2progress = 128;
-
-        private int ECGtmp;
-        private int Reotmp;
-        private int Sphigmo1tmp;
-        private int Sphigmo2tmp;
-        private int Apextmp;
-
-        private int nextECG;
-        private int nextReo;
-        private int nextSphigmo1;
-        private int nextSphigmo2;
-        private int nextApex;
-
-        private double detrendECG = 0;
-        private double detrendReo = 0;
-        private double detrendSphigmo1 = 0;
-        private double detrendSphigmo2 = 0;
-        private double detrendApex = 0;
-
-        private int prevECG;
-        private int prevReo;
-        private int prevSphigmo1;
-        private int prevSphigmo2;
-        private int prevApex;
 
         public byte Status;
 
         public uint MainIndex = 0;
         public int LineCounter = 0;
-        private const byte AccelZero = 128-105;
-        private const int MaxDTOCounter = 10;
+        public int TotalBytes;
 
-        public const int BytesInBlock=27;
-        private int byteNum;
         public bool RecordStarted;
         public bool DeviceTurnedOn;
-        private int DTOCounter;
         public bool Pump1Started;
         public bool Pump2Started;
-        private bool Pump1RealyStarted;
-        private bool Pump2RealyStarted;
 
-        private int DelayCounter1;
-        private int DelayCounter2;
+        private const byte _marker1 = 0x19;
+
+        private int _ecgTmp;
+        private int _reoTmp;
+        private int _sphigmo1Tmp;
+        private int _sphigmo2Tmp;
+        private int _apexTmp;
+
+        private int _nextECG;
+        private int _nextReo;
+        private int _nextSphigmo1;
+        private int _nextSphigmo2;
+        private int _nextApex;
+
+        private double _detrendECG = 0;
+        private double _detrendReo = 0;
+        private double _detrendSphigmo1 = 0;
+        private double _detrendSphigmo2 = 0;
+        private double _detrendApex = 0;
+
+        private int _prevECG;
+        private int _prevReo;
+        private int _prevSphigmo1;
+        private int _prevSphigmo2;
+        private int _prevApex;
+
+        private const int _maxNoDataCounter = 10;
+        private int _noDataCounter;
+
+        private int _byteNum;
+        private bool _pump1RealyStarted;
+        private bool _pump2RealyStarted;
+
+        private int _delayCounter1;
+        private int _delayCounter2;
         private const int MaxDelayCounter = 300;
-        public int TotalBytes;
         const double filterCoeff = 0.005;
         const double filterCoeffReo = 0.01;
 
-
         public ByteDecomposer(DataArrays data)
         {
-            Calibrate = false;
             Data = data;
             Pump1Started = false;
             Pump2Started = false;
-            Pump1RealyStarted = false;
-            Pump2RealyStarted = false;
             RecordStarted = false;
             DeviceTurnedOn = true;
-            DTOCounter = 0;
             TotalBytes = 0;
-            byteNum = 0;
             MainIndex = 0;
+            _pump1RealyStarted = false;
+            _pump2RealyStarted = false;
+            _noDataCounter = 0;
+            _byteNum = 0;
         }
 
         protected virtual void OnDecomposeLineEvent()
         {
-            if (DecomposeLineEvent != null)
-                DecomposeLineEvent(this, null);
+            DecomposeLineEvent?.Invoke(this, null);
         }
 
         protected virtual void OnConnectionBreakdown()
         {
-            if (ConnectionBreakdown != null)
-                ConnectionBreakdown(this, null);
+            ConnectionBreakdown?.Invoke(this, null);
         }
 
         public int Decompos(USBserialPort usbport)
@@ -185,35 +105,13 @@ namespace PolyCardio
             return ((1 - filterK) * next - (1 - filterK) * prev + (1 - 2 * filterK) * detrend);
         }
 
-        private void ProcessData(int[] inData, int[] outData, int size, bool fOn, double[] coeff)
-        {
-            int Aver = 0;
-            var tmpBuf = new int[size];
-            for (int i = 0; i < size; i++)
-            {
-                Aver = Aver + inData[i];
-            }
-            Aver = Aver / size;
-            for (int i = 0; i < size; i++)
-            {
-                tmpBuf[i] = inData[i] - Aver;
-            }
-            for (int i = 0; i < size; i++)
-            {
-                if (fOn)
-                    outData[i] = Filter.filterForView(coeff, tmpBuf, i);
-                else outData[i] = tmpBuf[i];
-            }
-        }
-
-
         public void CountViewArrays(int size, bool f)
         {
-            ProcessData(Data.ECGArray, Data.ECGViewArray , size, f, Filter.coeff50);
-            ProcessData(Data.ReoArray, Data.ReoViewArray, size, f, Filter.coeff14);
-            ProcessData(Data.Sphigmo1Array, Data.Sphigmo1ViewArray, size, f, Filter.coeff14);
-            ProcessData(Data.Sphigmo2Array, Data.Sphigmo2ViewArray, size, f, Filter.coeff14);
-            ProcessData(Data.ApexArray, Data.ApexViewArray, size, f, Filter.coeff14);
+            DataProcessing.Process(Data.ECGArray, Data.ECGViewArray , size, f, Filter.coeff50);
+            DataProcessing.Process(Data.ReoArray, Data.ReoViewArray, size, f, Filter.coeff14);
+            DataProcessing.Process(Data.Sphigmo1Array, Data.Sphigmo1ViewArray, size, f, Filter.coeff14);
+            DataProcessing.Process(Data.Sphigmo2Array, Data.Sphigmo2ViewArray, size, f, Filter.coeff14);
+            DataProcessing.Process(Data.ApexArray, Data.ApexViewArray, size, f, Filter.coeff14);
         }
 
         public int Decompos(USBserialPort usbport, Stream saveFileStream)
@@ -223,243 +121,231 @@ namespace PolyCardio
 
         public int Decompos(USBserialPort usbport, Stream saveFileStream, StreamWriter txtFileStream, PolyConfig cfg)
         {
-                int bytes = usbport.BytesRead;
-                if (bytes==0)
+            int bytes = usbport.BytesRead;
+            if (bytes==0)
+            {
+                _noDataCounter++;
+                if (_noDataCounter > _maxNoDataCounter)
                 {
-                    DTOCounter++;
-                    if (DTOCounter > MaxDTOCounter)
-                    {
-                        DeviceTurnedOn = false;
-                    }
-                    return 0;
+                    DeviceTurnedOn = false;
                 }
-                DeviceTurnedOn = true;
-                if (saveFileStream != null & RecordStarted)
+                return 0;
+            }
+            DeviceTurnedOn = true;
+            if (saveFileStream != null & RecordStarted)
+            {
+                try
                 {
-                    try
-                    {
-                        saveFileStream.Write(usbport.PortBuf, 0, bytes);
-                        TotalBytes = TotalBytes + bytes;
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message);
-                    }
+                    saveFileStream.Write(usbport.PortBuf, 0, bytes);
+                    TotalBytes += bytes;
                 }
-                for (int i = 0; i < bytes; i++)
+                catch (Exception ex)
                 {
-                    switch (byteNum)
-                    {
-                        case 0:// Marker
-                            if (usbport.PortBuf[i] == Marker1)
-                                byteNum = 1;
-                            break;
-                        case 1:// ECG1_0
-                            ECGtmp = (int)usbport.PortBuf[i];
-                            byteNum = 2;
-                            break;
-                        case 2:// ECG1_1
-                            ECGtmp = ECGtmp + 0x100 * (int)usbport.PortBuf[i];
-                            byteNum = 3;
-                            break;
-                        case 3:// ECG1_2
-                            ECGtmp = ECGtmp + 0x10000 * (int)usbport.PortBuf[i];
-                            if ((ECGtmp & 0x800000) != 0)
-                                ECGtmp = ECGtmp - 0x1000000;
+                    Debug.WriteLine(ex.Message);
+                }
+            }
+            for (int i = 0; i < bytes; i++)
+            {
+                switch (_byteNum)
+                {
+                    case 0:// Marker
+                        if (usbport.PortBuf[i] == _marker1)
+                        {
+                            _byteNum = 1;
+                        }
+                        break;
+                    case 1:// ECG1_0
+                        _ecgTmp = (int)usbport.PortBuf[i];
+                        _byteNum = 2;
+                        break;
+                    case 2:// ECG1_1
+                        _ecgTmp += 0x100 * (int)usbport.PortBuf[i];
+                        _byteNum = 3;
+                        break;
+                    case 3:// ECG1_2
+                        _ecgTmp += 0x10000 * (int)usbport.PortBuf[i];
+                        if ((_ecgTmp & 0x800000) != 0)
+                            _ecgTmp -= 0x1000000;
 
-                            Data.ECGArray[MainIndex] = ECGtmp;
+                        Data.ECGArray[MainIndex] = _ecgTmp;
 
-                            nextECG = ECGtmp;
-                            if (cfg != null)
-                            {
-                                if (cfg.FilterOn)
-                                    nextECG = Filter.filter(Filter.coeff50, Data.ECGArray, MainIndex);
-                            }
-                            detrendECG = FilterRecursDetrend(filterCoeff, nextECG, detrendECG, prevECG);
-                            Data.ECGViewArray[MainIndex] = (int)Math.Round(detrendECG);
+                        _nextECG = _ecgTmp;
+                        if (cfg != null)
+                        {
+                            if (cfg.FilterOn)
+                                _nextECG = Filter.FilterForRun(Filter.coeff50, Data.ECGArray, MainIndex);
+                        }
+                        _detrendECG = FilterRecursDetrend(filterCoeff, _nextECG, _detrendECG, _prevECG);
+                        Data.ECGViewArray[MainIndex] = (int)Math.Round(_detrendECG);
                             
-                            prevECG = nextECG;
-                            byteNum = 4;
-                            break;
+                        _prevECG = _nextECG;
+                        _byteNum = 4;
+                        break;
+                    case 4:// Reo_0
+                        _reoTmp = (int)usbport.PortBuf[i];
+                        _byteNum = 5;
+                        break;
+                    case 5:// Reo_1
+                        _reoTmp += 0x100 * (int)usbport.PortBuf[i];
+                        _byteNum = 6;
+                        break;
+                    case 6:// Reo_2
+                        _reoTmp += 0x10000 * (int)usbport.PortBuf[i];
+                        if ((_reoTmp & 0x800000) != 0)
+                            _reoTmp -= 0x1000000;
+                        if (_reoTmp > PolyConstants.ReoMaxVal) _reoTmp = PolyConstants.ReoMaxVal;
+                        Data.ReoArray[MainIndex] = - _reoTmp;
 
-                        case 4:// Reo_0
-                            Reotmp = (int)usbport.PortBuf[i];
-                            byteNum = 5;
-                            break;
-                        case 5:// Reo_1
-                            Reotmp = Reotmp + 0x100 * (int)usbport.PortBuf[i];
-                            byteNum = 6;
-                            break;
-                        case 6:// Reo_2
-                            Reotmp = Reotmp + 0x10000 * (int)usbport.PortBuf[i];
-                            if ((Reotmp & 0x800000) != 0)
-                                Reotmp = Reotmp - 0x1000000;
-                            if (Reotmp > PolyConstants.ReoMaxVal) Reotmp = PolyConstants.ReoMaxVal;
-                            Data.ReoArray[MainIndex] = - Reotmp;
+                        _nextReo = _reoTmp;
+                        if (cfg != null)
+                        {
+                            if (cfg.FilterOn)
+                                _nextReo = Filter.FilterForRun(Filter.coeff14, Data.ReoArray, MainIndex);
+                        }
 
-                            nextReo = Reotmp;
-                            if (cfg != null)
-                            {
-                                if (cfg.FilterOn)
-                                    nextReo = Filter.filter(Filter.coeff14, Data.ReoArray, MainIndex);
-                            }
+                        _detrendReo = FilterRecursDetrend(filterCoeffReo, _nextReo, _detrendReo, _prevReo);
+                        Data.ReoViewArray[MainIndex] = (int)Math.Round(_detrendReo);
 
-                            detrendReo = FilterRecursDetrend(filterCoeffReo, nextReo, detrendReo, prevReo);
-                            Data.ReoViewArray[MainIndex] = (int)Math.Round(detrendReo);
+                        _prevReo = _nextReo;
+                        _byteNum = 7;
+                        break;
+                    case 7:// Sphigmo1_0
+                        _sphigmo1Tmp = (byte)usbport.PortBuf[i];
+                        _byteNum = 8;
+                        break;
+                    case 8:// Sphigmo1_1
+                        _sphigmo1Tmp += 0x100 * (int)usbport.PortBuf[i];
+                        _byteNum = 9;
+                        break;
+                    case 9:// Sphigmo1_2
+                        _sphigmo1Tmp += 0x10000 * (int)usbport.PortBuf[i];
+                        if ((_sphigmo1Tmp & 0x800000) != 0)
+                            _sphigmo1Tmp = _sphigmo1Tmp - 0x1000000;
 
-                            prevReo = nextReo;
-                            byteNum = 7;
-                            break;
-                        case 7:// Sphigmo1_0
-                            Sphigmo1tmp = (byte)usbport.PortBuf[i];
-                            byteNum = 8;
-                            break;
-                        case 8:// Sphigmo1_1
-                            Sphigmo1tmp = Sphigmo1tmp + 0x100 * (int)usbport.PortBuf[i];
-                            byteNum = 9;
-                            break;
-                        case 9:// Sphigmo1_2
-                            Sphigmo1tmp = Sphigmo1tmp + 0x10000 * (int)usbport.PortBuf[i];
-                            if ((Sphigmo1tmp & 0x800000) != 0)
-                                Sphigmo1tmp = Sphigmo1tmp - 0x1000000;
+                        Data.Sphigmo1Array[MainIndex] = _sphigmo1Tmp;
 
-                            Data.Sphigmo1Array[MainIndex] = Sphigmo1tmp;
+                        _nextSphigmo1 = _sphigmo1Tmp;
+                        if (cfg != null)
+                        {
+                            if (cfg.FilterOn)
+                                _nextSphigmo1 = Filter.FilterForRun(Filter.coeff14, Data.Sphigmo1Array, MainIndex);
+                        }
 
-                            nextSphigmo1 = Sphigmo1tmp;
-                            if (cfg != null)
-                            {
-                                if (cfg.FilterOn)
-                                    nextSphigmo1 = Filter.filter(Filter.coeff14, Data.Sphigmo1Array, MainIndex);
-                            }
+                        _detrendSphigmo1 = FilterRecursDetrend(filterCoeff, _nextSphigmo1, _detrendSphigmo1, _prevSphigmo1);
+                        Data.Sphigmo1ViewArray[MainIndex] = (int)Math.Round(_detrendSphigmo1);
+                        _prevSphigmo1 = _nextSphigmo1;
+                        _byteNum = 10;
+                        break;
+                    case 10:// Sphigmo2_0
+                        _sphigmo2Tmp = (byte)usbport.PortBuf[i];
+                        _byteNum = 11;
+                        break;
+                    case 11:// Sphigmo2_1
+                        _sphigmo2Tmp += 0x100 * (int)usbport.PortBuf[i];
+                        _byteNum = 12;
+                        break;
+                    case 12:// Sphigmo2_2
+                        _sphigmo2Tmp += 0x10000 * (int)usbport.PortBuf[i];
+                        if ((_sphigmo2Tmp & 0x800000) != 0)
+                            _sphigmo2Tmp = _sphigmo2Tmp - 0x1000000;
 
-                            detrendSphigmo1 = FilterRecursDetrend(filterCoeff, nextSphigmo1, detrendSphigmo1, prevSphigmo1);
-                            Data.Sphigmo1ViewArray[MainIndex] = (int)Math.Round(detrendSphigmo1);
-                            prevSphigmo1 = nextSphigmo1;
-                            byteNum = 10;
-                            break;
-                        case 10:// Sphigmo2_0
-                            Sphigmo2tmp = (byte)usbport.PortBuf[i];
-                            byteNum = 11;
-                            break;
-                        case 11:// Sphigmo2_1
-                            Sphigmo2tmp = Sphigmo2tmp + 0x100 * (int)usbport.PortBuf[i];
-                            byteNum = 12;
-                            break;
-                        case 12:// Sphigmo2_2
-                            Sphigmo2tmp = Sphigmo2tmp + 0x10000 * (int)usbport.PortBuf[i];
-                            if ((Sphigmo2tmp & 0x800000) != 0)
-                                Sphigmo2tmp = Sphigmo2tmp - 0x1000000;
+                        Data.Sphigmo2Array[MainIndex] = _sphigmo2Tmp;
 
-                            Data.Sphigmo2Array[MainIndex] = Sphigmo2tmp;
+                        _nextSphigmo2 = _sphigmo2Tmp;
+                        if (cfg != null)
+                        {
+                            if (cfg.FilterOn)
+                                _nextSphigmo2 = Filter.FilterForRun(Filter.coeff14, Data.Sphigmo2Array, MainIndex);
+                        }
 
-                            nextSphigmo2 = Sphigmo2tmp;
-                            if (cfg != null)
-                            {
-                                if (cfg.FilterOn)
-                                    nextSphigmo2 = Filter.filter(Filter.coeff14, Data.Sphigmo2Array, MainIndex);
-                            }
+                        _detrendSphigmo2 = FilterRecursDetrend(filterCoeff, _nextSphigmo2, _detrendSphigmo2, _prevSphigmo2);
+                        Data.Sphigmo2ViewArray[MainIndex] = (int)Math.Round(_detrendSphigmo2);
+                        _prevSphigmo2 = _nextSphigmo2;
+                        _byteNum = 13;
+                        break;
 
-                            detrendSphigmo2 = FilterRecursDetrend(filterCoeff, nextSphigmo2, detrendSphigmo2, prevSphigmo2);
-                            Data.Sphigmo2ViewArray[MainIndex] = (int)Math.Round(detrendSphigmo2);
-                            prevSphigmo2 = nextSphigmo2;
-                            byteNum = 13;
-                            break;
+                    case 13: //Apex 0
+                        _apexTmp = (int)usbport.PortBuf[i];
+                        _byteNum = 14;
+                        break;
+                    case 14: //Apex 1
+                        _apexTmp += 0x100 * (int)(usbport.PortBuf[i]);
+                        _byteNum = 15;
+                        break;
+                    case 15: //Apex 2
+                        _apexTmp += 0x10000 * (int)usbport.PortBuf[i];
+                        if ((_apexTmp & 0x800000) != 0)
+                            _apexTmp = _apexTmp - 0x1000000;
 
-                        case 13: //Apex 0
-                            Apextmp = (int)usbport.PortBuf[i];
-                            byteNum = 14;
-                            break;
-                        case 14: //Apex 1
-                            Apextmp = Apextmp + 0x100 * (int)(usbport.PortBuf[i]);
-                            byteNum = 15;
-                            break;
-                        case 15: //Apex 2
-                            Apextmp = Apextmp + 0x10000 * (int)usbport.PortBuf[i];
-                            if ((Apextmp & 0x800000) != 0)
-                                Apextmp = Apextmp - 0x1000000;
+                        Data.ApexArray[MainIndex] = _apexTmp;
 
-                            Data.ApexArray[MainIndex] = Apextmp;
+                        _nextApex = _apexTmp;
+                        if (cfg != null)
+                        {
+                            if (cfg.FilterOn)
+                                _nextApex = Filter.FilterForRun(Filter.coeff14, Data.ApexArray, MainIndex);
+                        }
 
-                            nextApex = Apextmp;
-                            if (cfg != null)
-                            {
-                                if (cfg.FilterOn)
-                                    nextApex = Filter.filter(Filter.coeff14, Data.ApexArray, MainIndex);
-                            }
+                        _detrendApex = FilterRecursDetrend(filterCoeff, _nextApex, _detrendApex, _prevApex);
+                        Data.ApexViewArray[MainIndex] = (int)Math.Round(_detrendApex);
+                        _prevApex = _nextApex;
 
-                            detrendApex = FilterRecursDetrend(filterCoeff, nextApex, detrendApex, prevApex);
-                            Data.ApexViewArray[MainIndex] = (int)Math.Round(detrendApex);
-                            prevApex = nextApex;
+                        _byteNum = 16;
+                        break;
+                    case 16: //Status
+                        Status = usbport.PortBuf[i];
 
-                            byteNum = 16;
-                            break;
-                        case 16: //Status
-                            Status = usbport.PortBuf[i];
-
-                            if (Pump1Started & (Status & pump1progress) != 0)
-                                Pump1RealyStarted = true;
-                            if (Pump1RealyStarted)
-                            {
+                        if (Pump1Started & (Status & pump1progress) != 0)
+                            _pump1RealyStarted = true;
+                        if (_pump1RealyStarted)
+                        {
 //                                detrendSphigmo1 = 0;
-                                Data.Sphigmo1ViewArray[MainIndex] = 0;// (int)Math.Round(detrendSphigmo1);
-                            }
-                            if (Pump1RealyStarted & (Status & pump1progress) == 0)
+                            Data.Sphigmo1ViewArray[MainIndex] = 0;// (int)Math.Round(detrendSphigmo1);
+                        }
+                        if (_pump1RealyStarted & (Status & pump1progress) == 0)
+                        {
+                            _delayCounter1++;
+                            if (_delayCounter1 > MaxDelayCounter)
                             {
-                                DelayCounter1++;
-                                if (DelayCounter1 > MaxDelayCounter)
-                                {
-                                    Pump1Started = false;
-                                    Pump1RealyStarted = false;
-                                    detrendSphigmo1 = 0;
-                                    DelayCounter1 = 0;
-                                }
+                                Pump1Started = false;
+                                _pump1RealyStarted = false;
+                                _detrendSphigmo1 = 0;
+                                _delayCounter1 = 0;
                             }
+                        }
 
-                            if (Pump2Started & (Status & pump2progress) != 0)
-                                Pump2RealyStarted = true;
-                            if (Pump2RealyStarted)
+                        if (Pump2Started & (Status & pump2progress) != 0)
+                            _pump2RealyStarted = true;
+                        if (_pump2RealyStarted)
+                        {
+                            _detrendSphigmo2 = 0;
+                            Data.Sphigmo2ViewArray[MainIndex] = (int)Math.Round(_detrendSphigmo2);
+                        }
+                        if (_pump2RealyStarted & (Status & pump2progress) == 0)
+                        {
+                            _delayCounter2++;
+                            if (_delayCounter2 > MaxDelayCounter)
                             {
-                                detrendSphigmo2 = 0;
-                                Data.Sphigmo2ViewArray[MainIndex] = (int)Math.Round(detrendSphigmo2);
+                                Pump2Started = false;
+                                _pump2RealyStarted = false;
+                                _detrendSphigmo2 = 0;
+                                _delayCounter1 = 0;
                             }
-                            if (Pump2RealyStarted & (Status & pump2progress) == 0)
-                            {
-                                DelayCounter2++;
-                                if (DelayCounter2 > MaxDelayCounter)
-                                {
-                                    Pump2Started = false;
-                                    Pump2RealyStarted = false;
-                                    detrendSphigmo2 = 0;
-                                    DelayCounter1 = 0;
-                                }
-                            }
+                        }
 
-                            byteNum = 0;
+                        _byteNum = 0;
 
-                            if (RecordStarted)
-                                txtFileStream.WriteLine(GetDataString(MainIndex));
-                            OnDecomposeLineEvent();
-                            LineCounter++;
-                            MainIndex++;
-                            MainIndex = MainIndex & (DataArrSize - 1);
-                            break;
-                    }
+                        if (RecordStarted)
+                            txtFileStream.WriteLine(Data.GetDataString(MainIndex));
+                        OnDecomposeLineEvent();
+                        LineCounter++;
+                        MainIndex++;
+                        MainIndex &= (DataArrSize - 1);
+                        break;
                 }
-                usbport.BytesRead = 0;
-
-            return /*usbport.PortBuf.Length -*/ bytes;
-        }
-
-
-        private String GetDataString(uint index)
-        {
-            //"Dd:mm:yyyy HH:mm:ss:fff"
-            return String.Concat(DateTime.Now.ToString(), Convert.ToChar(9),
-                                 Data.ECGArray[index].ToString(), Convert.ToChar(9),
-                                 Data.ReoArray[index].ToString(), Convert.ToChar(9),
-                                 Data.Sphigmo1Array[index].ToString(), Convert.ToChar(9),
-                                 Data.Sphigmo2Array[index].ToString(), Convert.ToChar(9),
-                                 Data.ApexArray[index].ToString());
+            }
+            usbport.BytesRead = 0;
+            return bytes;
         }
     }
 }

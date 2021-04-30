@@ -30,25 +30,13 @@ namespace PolyCardio
         public static string RecInfoExtension = ".txt";
         public static string TmpTextFile = "tmp.t";
 
-        public const int DiagnCount = 11;
-        public const int ReservedCount = 8;
-        public static int PatientFieldsCount = 9;
-        public static int HeaderAndVisibleCount = 2;
-        public static int HeaderSize = PatientFieldsCount + ReservedCount + DiagnCount + HeaderAndVisibleCount;
-        //        public static double ScaleECG_Y = 1;
-//        public static double ScalePPG_Y = 1;
-
         public const string ConfigFileName = "PolyConf.cfg";
         public static string FilesToSendFileName = "fts.ls";
 
         public const int ReoMaxVal = 7000000;
 
-        public const string ECG1name = "ECG 1";
-        public const string ECG2name = "ECG 2";
-        public const string Reo1name = "Reo 1";
-        public const string Reo2name = "Reo 2";
-        public const string Sphigmo1name = "Sphigmo 1";
-        public const string Sphigmo2name = "Sphigmo 2";
-        public const string Polyname = "Poly";
+        public const string txErrorInitPort = "Error initialize virtual serial port";
+        public const string txError = "Error";
+        public const string txReserved = "RESERVED";
     }
 }
