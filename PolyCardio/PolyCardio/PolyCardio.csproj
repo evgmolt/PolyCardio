@@ -47,10 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataArrays.cs" />
     <Compile Include="DataProcessing.cs" />
     <Compile Include="PolyConfig.cs" />
     <Compile Include="PolyConstants.cs" />
-    <Compile Include="PolyStrings.cs" />
     <Compile Include="BufferedPanel.cs">
       <SubType>Component</SubType>
     </Compile>

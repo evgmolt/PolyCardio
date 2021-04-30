@@ -21,7 +21,7 @@ namespace PolyCardio
 
         public static Point[] MakeArray(Control view, int[] DataSource, uint index, int max, double scaleY, int scaleX)
         {
-            var size = ByteDecomposer.DataArrSize;// (ushort)DataSource.GetLength(0);
+            var size = ByteDecomposer.DataArrSize;
             var h = view.Height;
             var w = view.Width;
             var arr = new Point[w/scaleX];
@@ -29,8 +29,6 @@ namespace PolyCardio
             {
                 arr[i].X = i*scaleX;
                 double res = h/2-(int)Math.Round(scaleY*(h*DataSource[(index - w/scaleX + i*scaleX) & (size - 1)])/(max));
-//                if (res > h) res = h;
-                //if (res < 0) res = 0;
                 arr[i].Y = (int)Math.Round(res);
             }
             return arr;

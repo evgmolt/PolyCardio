@@ -332,8 +332,8 @@ namespace PolyCardio
 
         private void onConnectionFailure(Exception obj)
         {
-            string messageText = PolyStrings.txErrorInitPort;
-            string caption = PolyStrings.txError;
+            string messageText = PolyConstants.txErrorInitPort;
+            string caption = PolyConstants.txError;
             MessageBoxButtons but = MessageBoxButtons.OK;
             MessageBoxIcon icon = MessageBoxIcon.Error;
             MessageBox.Show(messageText, caption, but, icon);
@@ -645,7 +645,7 @@ namespace PolyCardio
         {
             for (int i = skip; i < lines.Length; i++)
             {
-                string[] s = lines[i].Split(Convert.ToChar(9));
+                string[] s = lines[i].Split('\t');
                 a.ECGArray[i - skip] = Convert.ToInt32(s[1]);
                 a.ReoArray[i - skip] = Convert.ToInt32(s[3]);
                 a.Sphigmo1Array[i - skip] = Convert.ToInt32(s[5]);
@@ -674,7 +674,7 @@ namespace PolyCardio
                     CurrentFile = Path.GetFileName(openFileDialog1.FileName);
 
                     string[] lines = File.ReadAllLines(openFileDialog1.FileName);
-                    int size = lines.Count() - PolyConstants.HeaderSize;
+                    int size = lines.Count();
                     UpdateScrollBar(size);
                     
                     if (size == 0)
@@ -684,8 +684,8 @@ namespace PolyCardio
                     }
 
                     DataA = new DataArrays(size+1000);
-                    decomposer = ParseData(lines, DataA, PolyConstants.HeaderSize);
-                    decomposer.CountViewArrays(lines.Length - PolyConstants.HeaderSize, Cfg.FilterOn);
+                    decomposer = ParseData(lines, DataA, 0);
+                    decomposer.CountViewArrays(lines.Length, Cfg.FilterOn);
                     SetScale(size);
                     foreach (GraphicsInfo gi in GInfoArr)
                     {
@@ -702,21 +702,21 @@ namespace PolyCardio
             int r1 = 0;
             int r2 = 0;
             
-            ChannelsMaxSize[0] = (int)(DataProcessing.GetRange(DataA.ECGViewArray, size));
-            ChannelsMaxSize[1] = (int)(DataProcessing.GetRange(DataA.ReoViewArray, size));
+            ChannelsMaxSize[0] = (int)(DataProcessing.GetRange(DataA.ECGViewArray));
+            ChannelsMaxSize[1] = (int)(DataProcessing.GetRange(DataA.ReoViewArray));
             r1 = 0;
             r2 = 0;
             if (GInfoArr[2].Visible)
             {
-                r1 = DataProcessing.GetRange(DataA.Sphigmo1ViewArray, size);
+                r1 = DataProcessing.GetRange(DataA.Sphigmo1ViewArray);
             }
             if (GInfoArr[3].Visible)
             {
-                r2 = DataProcessing.GetRange(DataA.Sphigmo2ViewArray, size);
+                r2 = DataProcessing.GetRange(DataA.Sphigmo2ViewArray);
             }
             ChannelsMaxSize[2] = (int)(coeff * Math.Max(r1, r2));
             ChannelsMaxSize[3] = (int)(coeff * Math.Max(r1, r2));
-            ChannelsMaxSize[4] = (int)(DataProcessing.GetRange(DataA.ApexViewArray, size) * coeff);
+            ChannelsMaxSize[4] = (int)(DataProcessing.GetRange(DataA.ApexViewArray) * coeff);
         }
 
         private void butFlow_Click(object sender, EventArgs e)
@@ -818,38 +818,6 @@ namespace PolyCardio
             {
                 decomposer.Pump2Started = false;
             }
-        }
-
-        private void butBPMeas_Click(object sender, EventArgs e)
-        {
-            USBPort.WriteByte(PolyConstants.cmStartBP1);
-        }
-
-        private void butBPabort_Click(object sender, EventArgs e)
-        {
-            USBPort.WriteByte(PolyConstants.cmCancelBP1);
-        }
-
-        private string GetName(int n)
-        {
-            switch (n)
-            {
-                case 0:
-                    return PolyConstants.ECG1name;
-                case 1:
-                    return PolyConstants.ECG2name;
-                case 2:
-                    return PolyConstants.Reo1name;
-                case 3:
-                    return PolyConstants.Reo2name;
-                case 4:
-                    return PolyConstants.Sphigmo1name;
-                case 5:
-                    return PolyConstants.Sphigmo2name;
-                case 6:
-                    return PolyConstants.Polyname;
-            }
-            return null;
         }
     }
 }
