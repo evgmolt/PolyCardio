@@ -29,8 +29,8 @@ namespace PolyCardio
         GraphicsInfo[] GInfoArr;
         TrackBar[] AmpBarArr;
         int[] AmpBarVals;
-        private string[] ChannelsNames = { "ECG", "Reogram", "Sphigmogram 1", "Sphigmogram 2", "Apex cardiogram" };
-        private int[] ChannelsMaxSize = { 60000, 5000, 40000, 40000, 4000 };
+        private string[] ChannelsNames = { "ECG 1", "ECG 2", "Reogram", "Sphigmogram 1", "Sphigmogram 2", "Apex cardiogram" };
+        private int[] ChannelsMaxSize = { 60000, 60000, 5000, 40000, 40000, 4000 };
         private int chECG = 0;
         private int chReo = 1;
         private int chSphigmo1 = 2;
@@ -114,7 +114,7 @@ namespace PolyCardio
 
         void LineReceived(object sender, EventArgs arg)
         {
-            labP3.Text = (DataA.ECGArray[decomposer.MainIndex]).ToString();
+            labP3.Text = (DataA.ECG1Array[decomposer.MainIndex]).ToString();
 
 //            labP1.Text = (DataA.Sphigmo1Array[decomposer.MainIndex] / k).ToString();
 //            labP2.Text = (DataA.Sphigmo2Array[decomposer.MainIndex] / k).ToString();
@@ -179,6 +179,7 @@ namespace PolyCardio
                     if (i == 2) gi.BufPanel.Paint += bufferedPanel2_Paint;
                     if (i == 3) gi.BufPanel.Paint += bufferedPanel3_Paint;
                     if (i == 4) gi.BufPanel.Paint += bufferedPanel4_Paint;
+                    if (i == 5) gi.BufPanel.Paint += bufferedPanel5_Paint;
                     panelGraph.Controls.Add(gi.BufPanel);
                     panelGraph.Controls.Add(gi.LabName);
                     GInfoArr[i] = gi;
@@ -238,7 +239,7 @@ namespace PolyCardio
             }
             if (AmpBarArr[0] != null)
             {
-                    AmpBarArr[0].Size = new Size(45, singleHeight);
+                    AmpBarArr[0].Size = new Size(45, singleHeight * 2);
             }
             if (AmpBarArr[1] != null)
             {
@@ -310,23 +311,27 @@ namespace PolyCardio
 
         private void bufferedPanel0_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ECGViewArray, null, GInfoArr[0].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
+                buffPanel_Paint(DataA.ECG1ViewArray, null, GInfoArr[0].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
         }
         private void bufferedPanel1_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ReoViewArray, null, GInfoArr[1].BufPanel, ChannelsScaleY[1], ChannelsMaxSize[1], e);
+                buffPanel_Paint(DataA.ECG2ViewArray, null, GInfoArr[1].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
         }
         private void bufferedPanel2_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.Sphigmo1ViewArray, null, GInfoArr[2].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[2], e);
+                buffPanel_Paint(DataA.ReoViewArray, null, GInfoArr[2].BufPanel, ChannelsScaleY[1], ChannelsMaxSize[1], e);
         }
         private void bufferedPanel3_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.Sphigmo2ViewArray, null, GInfoArr[3].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[3], e);
+                buffPanel_Paint(DataA.Sphigmo1ViewArray, null, GInfoArr[3].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[2], e);
         }
         private void bufferedPanel4_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ApexViewArray, null, GInfoArr[4].BufPanel, ChannelsScaleY[3], ChannelsMaxSize[3], e);
+                buffPanel_Paint(DataA.Sphigmo2ViewArray, null, GInfoArr[4].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[3], e);
+        }
+        private void bufferedPanel5_Paint(object sender, PaintEventArgs e)
+        {
+                buffPanel_Paint(DataA.ApexViewArray, null, GInfoArr[5].BufPanel, ChannelsScaleY[3], ChannelsMaxSize[3], e);
         }
 
 
@@ -646,7 +651,8 @@ namespace PolyCardio
             for (int i = skip; i < lines.Length; i++)
             {
                 string[] s = lines[i].Split('\t');
-                a.ECGArray[i - skip] = Convert.ToInt32(s[1]);
+                a.ECG1Array[i - skip] = Convert.ToInt32(s[1]);
+                a.ECG2Array[i - skip] = Convert.ToInt32(s[1]);
                 a.ReoArray[i - skip] = Convert.ToInt32(s[3]);
                 a.Sphigmo1Array[i - skip] = Convert.ToInt32(s[5]);
                 a.Sphigmo2Array[i - skip] = Convert.ToInt32(s[6]);
@@ -702,7 +708,7 @@ namespace PolyCardio
             int r1 = 0;
             int r2 = 0;
             
-            ChannelsMaxSize[0] = (int)(DataProcessing.GetRange(DataA.ECGViewArray));
+            ChannelsMaxSize[0] = (int)(DataProcessing.GetRange(DataA.ECG1ViewArray));
             ChannelsMaxSize[1] = (int)(DataProcessing.GetRange(DataA.ReoViewArray));
             r1 = 0;
             r2 = 0;

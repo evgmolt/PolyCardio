@@ -7,7 +7,7 @@ namespace PolyCardio
 {
     static class PolyConstants
     {
-        public const int NumOfChannels = 5;
+        public const int NumOfChannels = 6;
         public const byte M1 = 0xE6;
         public const byte ID = 0x61;
         public const byte cmGetID = 0x5A;

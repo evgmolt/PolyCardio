@@ -33,25 +33,29 @@ namespace PolyCardio
 
         private const byte _marker1 = 0x19;
 
-        private int _ecgTmp;
+        private int _ecg1Tmp;
+        private int _ecg2Tmp;
         private int _reoTmp;
         private int _sphigmo1Tmp;
         private int _sphigmo2Tmp;
         private int _apexTmp;
 
-        private int _nextECG;
+        private int _nextECG1;
+        private int _nextECG2;
         private int _nextReo;
         private int _nextSphigmo1;
         private int _nextSphigmo2;
         private int _nextApex;
 
-        private double _detrendECG = 0;
+        private double _detrendECG1 = 0;
+        private double _detrendECG2 = 0;
         private double _detrendReo = 0;
         private double _detrendSphigmo1 = 0;
         private double _detrendSphigmo2 = 0;
         private double _detrendApex = 0;
 
-        private int _prevECG;
+        private int _prevECG1;
+        private int _prevECG2;
         private int _prevReo;
         private int _prevSphigmo1;
         private int _prevSphigmo2;
@@ -107,7 +111,8 @@ namespace PolyCardio
 
         public void CountViewArrays(int size, bool f)
         {
-            DataProcessing.Process(Data.ECGArray, Data.ECGViewArray , size, f, Filter.coeff50);
+            DataProcessing.Process(Data.ECG1Array, Data.ECG1ViewArray , size, f, Filter.coeff50);
+            DataProcessing.Process(Data.ECG2Array, Data.ECG2ViewArray, size, f, Filter.coeff50);
             DataProcessing.Process(Data.ReoArray, Data.ReoViewArray, size, f, Filter.coeff14);
             DataProcessing.Process(Data.Sphigmo1Array, Data.Sphigmo1ViewArray, size, f, Filter.coeff14);
             DataProcessing.Process(Data.Sphigmo2Array, Data.Sphigmo2ViewArray, size, f, Filter.coeff14);
@@ -155,41 +160,68 @@ namespace PolyCardio
                         }
                         break;
                     case 1:// ECG1_0
-                        _ecgTmp = (int)usbport.PortBuf[i];
+                        _ecg1Tmp = (int)usbport.PortBuf[i];
                         _byteNum = 2;
                         break;
                     case 2:// ECG1_1
-                        _ecgTmp += 0x100 * (int)usbport.PortBuf[i];
+                        _ecg1Tmp += 0x100 * (int)usbport.PortBuf[i];
                         _byteNum = 3;
                         break;
                     case 3:// ECG1_2
-                        _ecgTmp += 0x10000 * (int)usbport.PortBuf[i];
-                        if ((_ecgTmp & 0x800000) != 0)
-                            _ecgTmp -= 0x1000000;
+                        _ecg1Tmp += 0x10000 * (int)usbport.PortBuf[i];
+                        if ((_ecg1Tmp & 0x800000) != 0)
+                            _ecg1Tmp -= 0x1000000;
 
-                        Data.ECGArray[MainIndex] = _ecgTmp;
+                        Data.ECG1Array[MainIndex] = _ecg1Tmp;
 
-                        _nextECG = _ecgTmp;
+                        _nextECG1 = _ecg1Tmp;
                         if (cfg != null)
                         {
                             if (cfg.FilterOn)
-                                _nextECG = Filter.FilterForRun(Filter.coeff50, Data.ECGArray, MainIndex);
+                                _nextECG1 = Filter.FilterForRun(Filter.coeff50, Data.ECG1Array, MainIndex);
                         }
-                        _detrendECG = FilterRecursDetrend(filterCoeff, _nextECG, _detrendECG, _prevECG);
-                        Data.ECGViewArray[MainIndex] = (int)Math.Round(_detrendECG);
+                        _detrendECG1 = FilterRecursDetrend(filterCoeff, _nextECG1, _detrendECG1, _prevECG1);
+                        Data.ECG1ViewArray[MainIndex] = (int)Math.Round(_detrendECG1);
                             
-                        _prevECG = _nextECG;
+                        _prevECG1 = _nextECG1;
                         _byteNum = 4;
                         break;
-                    case 4:// Reo_0
-                        _reoTmp = (int)usbport.PortBuf[i];
+                    case 4:// ECG2_0
+                        _ecg2Tmp = (int)usbport.PortBuf[i];
                         _byteNum = 5;
                         break;
-                    case 5:// Reo_1
-                        _reoTmp += 0x100 * (int)usbport.PortBuf[i];
+                    case 5:// ECG2_1
+                        _ecg2Tmp += 0x100 * (int)usbport.PortBuf[i];
                         _byteNum = 6;
                         break;
-                    case 6:// Reo_2
+                    case 6:// ECG2_2
+                        _ecg2Tmp += 0x10000 * (int)usbport.PortBuf[i];
+                        if ((_ecg2Tmp & 0x800000) != 0)
+                            _ecg2Tmp -= 0x1000000;
+
+                        Data.ECG2Array[MainIndex] = _ecg2Tmp;
+
+                        _nextECG2 = _ecg2Tmp;
+                        if (cfg != null)
+                        {
+                            if (cfg.FilterOn)
+                                _nextECG2 = Filter.FilterForRun(Filter.coeff50, Data.ECG2Array, MainIndex);
+                        }
+                        _detrendECG2 = FilterRecursDetrend(filterCoeff, _nextECG2, _detrendECG2, _prevECG2);
+                        Data.ECG2ViewArray[MainIndex] = (int)Math.Round(_detrendECG2);
+
+                        _prevECG2 = _nextECG2;
+                        _byteNum = 7;
+                        break;
+                    case 7:// Reo_0
+                        _reoTmp = (int)usbport.PortBuf[i];
+                        _byteNum = 8;
+                        break;
+                    case 8:// Reo_1
+                        _reoTmp += 0x100 * (int)usbport.PortBuf[i];
+                        _byteNum = 9;
+                        break;
+                    case 9:// Reo_2
                         _reoTmp += 0x10000 * (int)usbport.PortBuf[i];
                         if ((_reoTmp & 0x800000) != 0)
                             _reoTmp -= 0x1000000;
@@ -207,17 +239,17 @@ namespace PolyCardio
                         Data.ReoViewArray[MainIndex] = (int)Math.Round(_detrendReo);
 
                         _prevReo = _nextReo;
-                        _byteNum = 7;
+                        _byteNum = 10;
                         break;
-                    case 7:// Sphigmo1_0
+                    case 10:// Sphigmo1_0
                         _sphigmo1Tmp = (byte)usbport.PortBuf[i];
-                        _byteNum = 8;
+                        _byteNum = 11;
                         break;
-                    case 8:// Sphigmo1_1
+                    case 11:// Sphigmo1_1
                         _sphigmo1Tmp += 0x100 * (int)usbport.PortBuf[i];
-                        _byteNum = 9;
+                        _byteNum = 12;
                         break;
-                    case 9:// Sphigmo1_2
+                    case 12:// Sphigmo1_2
                         _sphigmo1Tmp += 0x10000 * (int)usbport.PortBuf[i];
                         if ((_sphigmo1Tmp & 0x800000) != 0)
                             _sphigmo1Tmp = _sphigmo1Tmp - 0x1000000;
@@ -234,17 +266,17 @@ namespace PolyCardio
                         _detrendSphigmo1 = FilterRecursDetrend(filterCoeff, _nextSphigmo1, _detrendSphigmo1, _prevSphigmo1);
                         Data.Sphigmo1ViewArray[MainIndex] = (int)Math.Round(_detrendSphigmo1);
                         _prevSphigmo1 = _nextSphigmo1;
-                        _byteNum = 10;
+                        _byteNum = 13;
                         break;
-                    case 10:// Sphigmo2_0
+                    case 13:// Sphigmo2_0
                         _sphigmo2Tmp = (byte)usbport.PortBuf[i];
-                        _byteNum = 11;
+                        _byteNum = 14;
                         break;
-                    case 11:// Sphigmo2_1
+                    case 14:// Sphigmo2_1
                         _sphigmo2Tmp += 0x100 * (int)usbport.PortBuf[i];
-                        _byteNum = 12;
+                        _byteNum = 15;
                         break;
-                    case 12:// Sphigmo2_2
+                    case 15:// Sphigmo2_2
                         _sphigmo2Tmp += 0x10000 * (int)usbport.PortBuf[i];
                         if ((_sphigmo2Tmp & 0x800000) != 0)
                             _sphigmo2Tmp = _sphigmo2Tmp - 0x1000000;
@@ -261,18 +293,17 @@ namespace PolyCardio
                         _detrendSphigmo2 = FilterRecursDetrend(filterCoeff, _nextSphigmo2, _detrendSphigmo2, _prevSphigmo2);
                         Data.Sphigmo2ViewArray[MainIndex] = (int)Math.Round(_detrendSphigmo2);
                         _prevSphigmo2 = _nextSphigmo2;
-                        _byteNum = 13;
+                        _byteNum = 16;
                         break;
-
-                    case 13: //Apex 0
+                    case 16: //Apex 0
                         _apexTmp = (int)usbport.PortBuf[i];
-                        _byteNum = 14;
+                        _byteNum = 17;
                         break;
-                    case 14: //Apex 1
+                    case 17: //Apex 1
                         _apexTmp += 0x100 * (int)(usbport.PortBuf[i]);
-                        _byteNum = 15;
+                        _byteNum = 18;
                         break;
-                    case 15: //Apex 2
+                    case 18: //Apex 2
                         _apexTmp += 0x10000 * (int)usbport.PortBuf[i];
                         if ((_apexTmp & 0x800000) != 0)
                             _apexTmp = _apexTmp - 0x1000000;
@@ -290,9 +321,9 @@ namespace PolyCardio
                         Data.ApexViewArray[MainIndex] = (int)Math.Round(_detrendApex);
                         _prevApex = _nextApex;
 
-                        _byteNum = 16;
+                        _byteNum = 19;
                         break;
-                    case 16: //Status
+                    case 19: //Status
                         Status = usbport.PortBuf[i];
 
                         if (Pump1Started & (Status & pump1progress) != 0)
