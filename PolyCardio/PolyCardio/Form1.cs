@@ -30,12 +30,13 @@ namespace PolyCardio
         TrackBar[] AmpBarArr;
         int[] AmpBarVals;
         private string[] ChannelsNames = { "ECG 1", "ECG 2", "Reogram", "Sphigmogram 1", "Sphigmogram 2", "Apex cardiogram" };
-        private int[] ChannelsMaxSize = { 60000, 60000, 5000, 40000, 40000, 4000 };
-        private int chECG = 0;
-        private int chReo = 1;
-        private int chSphigmo1 = 2;
-        private int chSphigmo2 = 3;
-        private int chApex = 4;
+        private int[] ChannelsMaxSize = { 60000, 500, 40000, 4000 };
+        int chECG1 = 0;
+        int chECG2 = 1;
+        int chReo = 2;
+        int chSphigmo1 = 3;
+        int chSphigmo2 = 4;
+        int chApex = 5;
         private double[] ChannelsScaleY;
         private int ViewShift = 0;
         private bool ViewMode = false;
@@ -205,26 +206,14 @@ namespace PolyCardio
                     AmpBarArr[i] = null;
                 }
             }
-            if (GInfoArr[chECG].Visible)
-            {
-                AmpBarArr[0] = new TrackBar();
-                AmpBarArr[0].ValueChanged += trackBarECG_ValueChanged;
-            }
-            if (GInfoArr[chReo].Visible)
-            {
-                AmpBarArr[1] = new TrackBar();
-                AmpBarArr[1].ValueChanged += trackBarReo_ValueChanged;
-            }
-            if (GInfoArr[chSphigmo1].Visible | GInfoArr[chSphigmo2].Visible)
-            {
-                AmpBarArr[2] = new TrackBar();
-                AmpBarArr[2].ValueChanged += trackBarSphigmo_ValueChanged;
-            }
-            if (GInfoArr[chApex].Visible)
-            {
-                AmpBarArr[3] = new TrackBar();
-                AmpBarArr[3].ValueChanged += trackBarApex_ValueChanged;
-            }
+            AmpBarArr[0] = new TrackBar();
+            AmpBarArr[0].ValueChanged += trackBarECG_ValueChanged;
+            AmpBarArr[1] = new TrackBar();
+            AmpBarArr[1].ValueChanged += trackBarReo_ValueChanged;
+            AmpBarArr[2] = new TrackBar();
+            AmpBarArr[2].ValueChanged += trackBarSphigmo_ValueChanged;
+            AmpBarArr[3] = new TrackBar();
+            AmpBarArr[3].ValueChanged += trackBarApex_ValueChanged;
 
             for (int i = 0; i < AmpBarArr.Length; i++)
             {
@@ -237,29 +226,11 @@ namespace PolyCardio
                     AmpBarArr[i].LargeChange = 1;
                 }
             }
-            if (AmpBarArr[0] != null)
-            {
-                    AmpBarArr[0].Size = new Size(45, singleHeight * 2);
-            }
-            if (AmpBarArr[1] != null)
-            {
-                    AmpBarArr[1].Size = new Size(45, singleHeight);
-            }
-            if (AmpBarArr[2] != null)
-            {
-                if ((GInfoArr[chSphigmo1].Visible ^ GInfoArr[chSphigmo2].Visible))
-                {
-                    AmpBarArr[2].Size = new Size(45, singleHeight);
-                }
-                else
-                {
-                    AmpBarArr[2].Size = new Size(45, singleHeight * 2);
-                }
-            }
-            if (AmpBarArr[3] != null)
-            {
-                AmpBarArr[3].Size = new Size(45, singleHeight);
-            }
+            AmpBarArr[0].Size = new Size(45, singleHeight * 2);
+            AmpBarArr[1].Size = new Size(45, singleHeight);
+            AmpBarArr[2].Size = new Size(45, singleHeight * 2);
+            AmpBarArr[3].Size = new Size(45, singleHeight);
+
             int Y = space;
             for (int i = 0; i < AmpBarArr.Count(); i++)
             {
@@ -278,7 +249,7 @@ namespace PolyCardio
         }
 
 
-        private void buffPanel_Paint(int[] data, int[] derivdata, Control panel, double ScaleY, int MaxSize, PaintEventArgs e)
+        private void buffPanel_Paint(int[] data, Control panel, double ScaleY, int MaxSize, PaintEventArgs e)
         {
 //            if (decomposer.MainIndex < 2 & !ViewMode) return;
             float tension = 0.1F;
@@ -296,42 +267,40 @@ namespace PolyCardio
             {
                 OutArray = ViewArrayMaker.MakeArrayForView(panel, data, ViewShift, MaxSize, ScaleY);
             }
-            var pen = new Pen(Color.Red, 1);
-            e.Graphics.DrawCurve(pen, OutArray, tension);
-            pen.Dispose();
-            if (derivdata != null)
+            try
             {
-                Point[] DerivArray = ViewArrayMaker.MakeArrayForView(panel, derivdata, ViewShift, MaxSize, ScaleY);
-                var penD = new Pen(Color.Black, 1);
-                e.Graphics.DrawCurve(penD, DerivArray, tension);
-                penD.Dispose();
+                var pen = new Pen(Color.Red, 1);
+                e.Graphics.DrawCurve(pen, OutArray, tension);
+                pen.Dispose();
             }
-
+            catch (Exception)
+            {
+            }
         }
 
         private void bufferedPanel0_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ECG1ViewArray, null, GInfoArr[0].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
+                buffPanel_Paint(DataA.ECG1ViewArray, GInfoArr[0].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
         }
         private void bufferedPanel1_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ECG2ViewArray, null, GInfoArr[1].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
+                buffPanel_Paint(DataA.ECG2ViewArray, GInfoArr[1].BufPanel, ChannelsScaleY[0], ChannelsMaxSize[0], e);
         }
         private void bufferedPanel2_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ReoViewArray, null, GInfoArr[2].BufPanel, ChannelsScaleY[1], ChannelsMaxSize[1], e);
+                buffPanel_Paint(DataA.ReoViewArray, GInfoArr[2].BufPanel, ChannelsScaleY[1], ChannelsMaxSize[1], e);
         }
         private void bufferedPanel3_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.Sphigmo1ViewArray, null, GInfoArr[3].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[2], e);
+                buffPanel_Paint(DataA.Sphigmo1ViewArray, GInfoArr[3].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[2], e);
         }
         private void bufferedPanel4_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.Sphigmo2ViewArray, null, GInfoArr[4].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[3], e);
+                buffPanel_Paint(DataA.Sphigmo2ViewArray, GInfoArr[4].BufPanel, ChannelsScaleY[2], ChannelsMaxSize[2], e);
         }
         private void bufferedPanel5_Paint(object sender, PaintEventArgs e)
         {
-                buffPanel_Paint(DataA.ApexViewArray, null, GInfoArr[5].BufPanel, ChannelsScaleY[3], ChannelsMaxSize[3], e);
+                buffPanel_Paint(DataA.ApexViewArray, GInfoArr[5].BufPanel, ChannelsScaleY[3], ChannelsMaxSize[3], e);
         }
 
 
@@ -483,7 +452,6 @@ namespace PolyCardio
                 labConnected.Text = "Disconnected";
                 Connected = false;
             }
-
         }
 
 
@@ -608,7 +576,8 @@ namespace PolyCardio
             ChannelsScaleY[0] = Math.Pow(2, a / 2);
             if (ViewMode)
             {
-                if (GInfoArr[chECG].Visible) GInfoArr[chECG].BufPanel.Refresh();
+                if (GInfoArr[chECG1].Visible) GInfoArr[chECG1].BufPanel.Refresh();
+                if (GInfoArr[chECG2].Visible) GInfoArr[chECG2].BufPanel.Refresh();
             }
         }
 
@@ -648,19 +617,27 @@ namespace PolyCardio
 
         private ByteDecomposer ParseData(string[] lines, DataArrays a, int skip)
         {
-            for (int i = skip; i < lines.Length; i++)
+            try
             {
-                string[] s = lines[i].Split('\t');
-                a.ECG1Array[i - skip] = Convert.ToInt32(s[1]);
-                a.ECG2Array[i - skip] = Convert.ToInt32(s[1]);
-                a.ReoArray[i - skip] = Convert.ToInt32(s[3]);
-                a.Sphigmo1Array[i - skip] = Convert.ToInt32(s[5]);
-                a.Sphigmo2Array[i - skip] = Convert.ToInt32(s[6]);
-                a.ApexArray[i - skip] = Convert.ToInt32(s[7]);
+                for (int i = skip; i < lines.Length; i++)
+                {
+                    string[] s = lines[i].Split('\t');
+                    a.ECG1Array[i - skip] = Convert.ToInt32(s[1]);
+                    a.ECG2Array[i - skip] = Convert.ToInt32(s[1]);
+                    a.ReoArray[i - skip] = Convert.ToInt32(s[3]);
+                    a.Sphigmo1Array[i - skip] = Convert.ToInt32(s[5]);
+                    a.Sphigmo2Array[i - skip] = Convert.ToInt32(s[6]);
+                    a.ApexArray[i - skip] = Convert.ToInt32(s[7]);
+                }
+                var d = new ByteDecomposer(a);
+                d.MainIndex = (uint)lines.Length;
+                return d;
             }
-            var d = new ByteDecomposer(a);
-            d.MainIndex = (uint)lines.Length;
-            return d;
+            catch (Exception)
+            {
+                MessageBox.Show("Invalid file format");
+                return null;
+            }
         }
 
         private void butOpenFile_Click(object sender, EventArgs e)
@@ -705,24 +682,14 @@ namespace PolyCardio
         private void SetScale(int size)
         {
             double coeff = 1.5;
-            int r1 = 0;
-            int r2 = 0;
-            
-            ChannelsMaxSize[0] = (int)(DataProcessing.GetRange(DataA.ECG1ViewArray));
-            ChannelsMaxSize[1] = (int)(DataProcessing.GetRange(DataA.ReoViewArray));
-            r1 = 0;
-            r2 = 0;
-            if (GInfoArr[2].Visible)
-            {
-                r1 = DataProcessing.GetRange(DataA.Sphigmo1ViewArray);
-            }
-            if (GInfoArr[3].Visible)
-            {
-                r2 = DataProcessing.GetRange(DataA.Sphigmo2ViewArray);
-            }
+            int r1 = DataProcessing.GetRange(DataA.ECG1ViewArray);
+            int r2 = DataProcessing.GetRange(DataA.ECG2ViewArray);
+            ChannelsMaxSize[0] = (int)(coeff * Math.Max(r1, r2));
+            ChannelsMaxSize[1] = (int)(DataProcessing.GetRange(DataA.ReoViewArray) * coeff);
+            r1 = DataProcessing.GetRange(DataA.Sphigmo1ViewArray);
+            r2 = DataProcessing.GetRange(DataA.Sphigmo2ViewArray);
             ChannelsMaxSize[2] = (int)(coeff * Math.Max(r1, r2));
-            ChannelsMaxSize[3] = (int)(coeff * Math.Max(r1, r2));
-            ChannelsMaxSize[4] = (int)(DataProcessing.GetRange(DataA.ApexViewArray) * coeff);
+            ChannelsMaxSize[3] = (int)(DataProcessing.GetRange(DataA.ApexViewArray) * coeff);
         }
 
         private void butFlow_Click(object sender, EventArgs e)

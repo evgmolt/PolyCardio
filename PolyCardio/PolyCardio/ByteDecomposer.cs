@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace PolyCardio
 {
@@ -146,6 +147,7 @@ namespace PolyCardio
                 }
                 catch (Exception ex)
                 {
+                    MessageBox.Show("Save file stream error. " + ex.Message);
                     Debug.WriteLine(ex.Message);
                 }
             }
