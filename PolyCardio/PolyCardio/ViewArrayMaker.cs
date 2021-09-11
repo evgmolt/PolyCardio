@@ -54,8 +54,14 @@ namespace PolyCardio
                 if (i > W-1) break;
                 arr[i].X = i * scaleX;
                 double res;
-                if (i > dataSource.Length - 1) res = H / 2;
-                else res = H / 2 - scaleY * (H * dataSource[shift + i]) / max;
+                if (shift + i > dataSource.Length - 1)
+                {
+                    res = H / 2;
+                }
+                else
+                {
+                    res = H / 2 - scaleY * (H * dataSource[shift + i]) / max;
+                }
                 arr[i].Y = (int)Math.Round(res);
             }
             return arr;

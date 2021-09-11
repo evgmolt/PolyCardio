@@ -30,7 +30,7 @@ namespace PolyCardio
         TrackBar[] AmpBarArr;
         int[] AmpBarVals;
         private string[] ChannelsNames = { "ECG 1", "ECG 2", "Reogram", "Sphigmogram 1", "Sphigmogram 2", "Apex cardiogram" };
-        private int[] ChannelsMaxSize = { 60000, 500, 40000, 4000 };
+        private int[] ChannelsMaxSize = { 60000, 6000, 40000, 4000 };
         int chECG1 = 0;
         int chECG2 = 1;
         int chReo = 2;
@@ -43,7 +43,6 @@ namespace PolyCardio
         FileStream filestream;
         StreamWriter textWriter;
         private string CurrentFile;
-        private bool DataReadyToSave = false;
         private int DelayCounter;
     
         public Form1()
@@ -124,17 +123,20 @@ namespace PolyCardio
 
         void NewLineReceived(object sender, EventArgs agr)
         {
-//            if (decomposer.LineCounter % ByteDecomposer.SamplingFrequency != 0) return;
             int lc = decomposer.LineCounter / ByteDecomposer.SamplingFrequency;
             labRecordSize.Text = String.Concat("Record size : ",
                                                lc.ToString(),
                                                " sec");
-            if (decomposer.LineCounter > (Cfg.RecordLength * ByteDecomposer.SamplingFrequency))
+            if (Cfg.RecordLength != 0)
             {
-                StopRecord();
-                return;
+                if (decomposer.LineCounter > (Cfg.RecordLength * ByteDecomposer.SamplingFrequency))
+                {
+                    StopRecord();
+                    return;
+                }
+                pbRecordProgress.Value = decomposer.LineCounter;
             }
-            pbRecordProgress.Value = decomposer.LineCounter;
+            
         }
 
 
@@ -399,11 +401,9 @@ namespace PolyCardio
                 butFlow.Text = "Stop stream";
             }
 
-            butSaveRecord.Enabled = DataReadyToSave;
-
             if (decomposer != null)
             {
-                butNewRecord.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
+//                butNewRecord.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
                 butStartRecord.Enabled = Connected & !decomposer.RecordStarted & !ViewMode & decomposer.DeviceTurnedOn;                butFlow.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.RecordStarted;
                 butPump1start.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.Pump1Started;
                 butPump2start.Enabled = Connected & decomposer.DeviceTurnedOn & !decomposer.Pump2Started; ;
@@ -416,6 +416,8 @@ namespace PolyCardio
             {
                 butFlow.Enabled = false;
             }
+
+            butStopRecord.Enabled = !butStartRecord.Enabled & decomposer.RecordStarted;
 
             if (USBPort == null)
             {
@@ -455,9 +457,8 @@ namespace PolyCardio
         }
 
 
-        private void butNewRecord_Click(object sender, EventArgs e)
+        private bool GetFileNameDialog()
         {
-//            CurrentFile = Cfg.DataFileNum.ToString("D4");
             saveFileDialog1.FileName = "";
             saveFileDialog1.InitialDirectory = Cfg.DataDir.ToString();
             saveFileDialog1.Filter = "Text files | *.txt|All files | *.*";
@@ -466,14 +467,22 @@ namespace PolyCardio
                 Cfg.DataDir = Path.GetDirectoryName(saveFileDialog1.FileName) + @"\";
                 PolyConfig.SaveConfig(Cfg);
                 CurrentFile = Path.GetFileName(saveFileDialog1.FileName);
+                return true;
             }
+            return false;
         }
 
         private void StartRecord()
         {
-            pbRecordProgress.Maximum = Cfg.RecordLength * ByteDecomposer.SamplingFrequency;
-            //            string fname = String.Concat(Cfg.DataDir.ToString(), CurrentFile, PolyConstants.DataFileExtension);
-            //            filestream = new FileStream(fname, FileMode.Create);
+            if (Cfg.RecordLength > 0)
+            {
+                pbRecordProgress.Style = ProgressBarStyle.Blocks;
+                pbRecordProgress.Maximum = Cfg.RecordLength * ByteDecomposer.SamplingFrequency;
+            }
+            else
+            {
+                pbRecordProgress.Style = ProgressBarStyle.Marquee;
+            }
             textWriter = new StreamWriter(Cfg.DataDir.ToString() + PolyConstants.TmpTextFile);
             decomposer.TotalBytes = 0;
             decomposer.LineCounter = 0;
@@ -483,14 +492,24 @@ namespace PolyCardio
 
         private void butStartRecord_Click(object sender, EventArgs e)
         {
-//            timerDelay.Interval = Cfg.StartDelay * 1000;
-            timerDelay.Enabled = true;
-            DelayCounter = Cfg.StartDelay;
-            labRecordSize.Text = "Start delay : " + DelayCounter.ToString() + " sec";
-            labRecordSize.Visible = true;
+            if (!GetFileNameDialog()) return;
             pbRecordProgress.Visible = true;
-            pbRecordProgress.Value = 0;
-            pbRecordProgress.Maximum = Cfg.StartDelay;
+            if (Cfg.StartDelay > 0)
+            {
+                timerDelay.Interval = Cfg.StartDelay * 1000;
+                timerDelay.Enabled = true;
+                DelayCounter = Cfg.StartDelay;
+
+                labRecordSize.Text = "Start delay : " + DelayCounter.ToString() + " sec";
+                labRecordSize.Visible = true;
+                pbRecordProgress.Style = ProgressBarStyle.Blocks;
+                pbRecordProgress.Value = 0;
+                pbRecordProgress.Maximum = Cfg.StartDelay;
+            }
+            else
+            {
+                StartRecord();
+            }
         }
 
         private void timerDelay_Tick(object sender, EventArgs e)
@@ -525,21 +544,18 @@ namespace PolyCardio
             labRecordSize.Visible = false;
             decomposer.DecomposeLineEvent -= NewLineReceived;
             decomposer.DecomposeLineEvent -= LineReceived;
-//            String fname = filestream.Name;
             decomposer.RecordStarted = false;
             decomposer = null;
-//            filestream.Close();
-//            filestream.Dispose();
             if (textWriter != null) textWriter.Dispose();
             string[] lines = File.ReadAllLines(Cfg.DataDir.ToString() + PolyConstants.TmpTextFile);
             File.AppendAllLines(CurrentFile, lines);
 
             ViewMode = true;
             timerRead.Enabled = false;
-//            timerPaint.Enabled = false;
 
             DataA = new DataArrays(lines.Length);
             decomposer = ParseData(lines, DataA, 0);
+            if (decomposer == null) return;
             decomposer.CountViewArrays(lines.Length, Cfg.FilterOn);
             SetScale(lines.Length);
             for (int i = 0; i < AmpBarVals.Length; i++)
@@ -559,14 +575,13 @@ namespace PolyCardio
             {
                 if (gi.Visible) gi.BufPanel.Refresh();
             }
-            DataReadyToSave = true;
         }
 
-        private void butSaveRecord_Click(object sender, EventArgs e)
+        private void butStopRecord_Click(object sender, EventArgs e)
         {
+            StopRecord();
             Cfg.DataFileNum++;
             PolyConfig.SaveConfig(Cfg);
-            DataReadyToSave = false;
         }
 
         private void trackBarECG_ValueChanged(object sender, EventArgs e)
@@ -623,11 +638,11 @@ namespace PolyCardio
                 {
                     string[] s = lines[i].Split('\t');
                     a.ECG1Array[i - skip] = Convert.ToInt32(s[1]);
-                    a.ECG2Array[i - skip] = Convert.ToInt32(s[1]);
+                    a.ECG2Array[i - skip] = Convert.ToInt32(s[2]);
                     a.ReoArray[i - skip] = Convert.ToInt32(s[3]);
-                    a.Sphigmo1Array[i - skip] = Convert.ToInt32(s[5]);
-                    a.Sphigmo2Array[i - skip] = Convert.ToInt32(s[6]);
-                    a.ApexArray[i - skip] = Convert.ToInt32(s[7]);
+                    a.Sphigmo1Array[i - skip] = Convert.ToInt32(s[4]);
+                    a.Sphigmo2Array[i - skip] = Convert.ToInt32(s[5]);
+                    a.ApexArray[i - skip] = Convert.ToInt32(s[6]);
                 }
                 var d = new ByteDecomposer(a);
                 d.MainIndex = (uint)lines.Length;
@@ -694,7 +709,6 @@ namespace PolyCardio
 
         private void butFlow_Click(object sender, EventArgs e)
         {
-            DataReadyToSave = false;
             ViewMode = !ViewMode;
             timerRead.Enabled = !ViewMode;
             timerPaint.Enabled = !ViewMode;
@@ -792,6 +806,7 @@ namespace PolyCardio
                 decomposer.Pump2Started = false;
             }
         }
+
     }
 }
 

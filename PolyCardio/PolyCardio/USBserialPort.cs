@@ -25,7 +25,7 @@ namespace PolyCardio
         public Boolean ReadEnabled;
         readonly System.Threading.Timer ReadTimer;
 
-        private readonly int _portBufSize = 1000;
+        private readonly int _portBufSize = 10000;
         private readonly int _baudRate;
 
         public event Action<Exception> ConnectionFailure;
@@ -38,7 +38,21 @@ namespace PolyCardio
             if (PortHandle.IsOpen)
             {
                 if (PortHandle.BytesToRead > 0)
-                    BytesRead = PortHandle.Read(PortBuf, 0, PortHandle.BytesToRead);
+                {
+                    int bytesToRead = PortHandle.BytesToRead;
+                    if (bytesToRead > PortBuf.Length)
+                    {
+                        bytesToRead = PortBuf.Length;
+                    }
+                    try
+                    {
+                        BytesRead = PortHandle.Read(PortBuf, 0, bytesToRead);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                    
             }
         }
         

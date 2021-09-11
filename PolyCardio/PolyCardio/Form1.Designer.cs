@@ -36,7 +36,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.butPumpsStop = new System.Windows.Forms.Button();
             this.butPumpsStart = new System.Windows.Forms.Button();
-            this.butNewRecord = new System.Windows.Forms.Button();
             this.pbRecordProgress = new System.Windows.Forms.ProgressBar();
             this.butPump2stop = new System.Windows.Forms.Button();
             this.butPump2start = new System.Windows.Forms.Button();
@@ -51,7 +50,7 @@
             this.butFlow = new System.Windows.Forms.Button();
             this.butOpenFile = new System.Windows.Forms.Button();
             this.labRecordSize = new System.Windows.Forms.Label();
-            this.butSaveRecord = new System.Windows.Forms.Button();
+            this.butStopRecord = new System.Windows.Forms.Button();
             this.butStartRecord = new System.Windows.Forms.Button();
             this.butSettings = new System.Windows.Forms.Button();
             this.hScrollBar1 = new System.Windows.Forms.HScrollBar();
@@ -108,7 +107,6 @@
             this.panelButtons.Controls.Add(this.label1);
             this.panelButtons.Controls.Add(this.butPumpsStop);
             this.panelButtons.Controls.Add(this.butPumpsStart);
-            this.panelButtons.Controls.Add(this.butNewRecord);
             this.panelButtons.Controls.Add(this.pbRecordProgress);
             this.panelButtons.Controls.Add(this.butPump2stop);
             this.panelButtons.Controls.Add(this.butPump2start);
@@ -123,7 +121,7 @@
             this.panelButtons.Controls.Add(this.butFlow);
             this.panelButtons.Controls.Add(this.butOpenFile);
             this.panelButtons.Controls.Add(this.labRecordSize);
-            this.panelButtons.Controls.Add(this.butSaveRecord);
+            this.panelButtons.Controls.Add(this.butStopRecord);
             this.panelButtons.Controls.Add(this.butStartRecord);
             this.panelButtons.Controls.Add(this.butSettings);
             this.panelButtons.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -160,16 +158,6 @@
             this.butPumpsStart.Text = ">";
             this.butPumpsStart.UseVisualStyleBackColor = true;
             this.butPumpsStart.Click += new System.EventHandler(this.butPumpsStart_Click);
-            // 
-            // butNewRecord
-            // 
-            this.butNewRecord.Location = new System.Drawing.Point(13, 38);
-            this.butNewRecord.Name = "butNewRecord";
-            this.butNewRecord.Size = new System.Drawing.Size(75, 23);
-            this.butNewRecord.TabIndex = 22;
-            this.butNewRecord.Text = "New record";
-            this.butNewRecord.UseVisualStyleBackColor = true;
-            this.butNewRecord.Click += new System.EventHandler(this.butNewRecord_Click);
             // 
             // pbRecordProgress
             // 
@@ -303,15 +291,15 @@
             this.labRecordSize.Text = "label2";
             this.labRecordSize.Visible = false;
             // 
-            // butSaveRecord
+            // butStopRecord
             // 
-            this.butSaveRecord.Location = new System.Drawing.Point(13, 154);
-            this.butSaveRecord.Name = "butSaveRecord";
-            this.butSaveRecord.Size = new System.Drawing.Size(75, 23);
-            this.butSaveRecord.TabIndex = 5;
-            this.butSaveRecord.Text = "Save record";
-            this.butSaveRecord.UseVisualStyleBackColor = true;
-            this.butSaveRecord.Click += new System.EventHandler(this.butSaveRecord_Click);
+            this.butStopRecord.Location = new System.Drawing.Point(13, 154);
+            this.butStopRecord.Name = "butStopRecord";
+            this.butStopRecord.Size = new System.Drawing.Size(75, 23);
+            this.butStopRecord.TabIndex = 5;
+            this.butStopRecord.Text = "Stop record";
+            this.butStopRecord.UseVisualStyleBackColor = true;
+            this.butStopRecord.Click += new System.EventHandler(this.butStopRecord_Click);
             // 
             // butStartRecord
             // 
@@ -319,7 +307,7 @@
             this.butStartRecord.Name = "butStartRecord";
             this.butStartRecord.Size = new System.Drawing.Size(75, 23);
             this.butStartRecord.TabIndex = 4;
-            this.butStartRecord.Text = "Start record";
+            this.butStartRecord.Text = "New record";
             this.butStartRecord.UseVisualStyleBackColor = true;
             this.butStartRecord.Click += new System.EventHandler(this.butStartRecord_Click);
             // 
@@ -417,7 +405,7 @@
         private System.Windows.Forms.Button butSettings;
         private System.Windows.Forms.Timer timerPaint;
         private System.Windows.Forms.Label labConnected;
-        private System.Windows.Forms.Button butSaveRecord;
+        private System.Windows.Forms.Button butStopRecord;
         private System.Windows.Forms.Button butStartRecord;
         private System.Windows.Forms.Timer timerStatus;
         private System.Windows.Forms.Label labRecordSize;
@@ -437,7 +425,6 @@
         private System.Windows.Forms.Button butPump1stop;
         private System.Windows.Forms.Button butPump1start;
         private System.Windows.Forms.ProgressBar pbRecordProgress;
-        private System.Windows.Forms.Button butNewRecord;
         private System.Windows.Forms.Button butPumpsStop;
         private System.Windows.Forms.Button butPumpsStart;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
