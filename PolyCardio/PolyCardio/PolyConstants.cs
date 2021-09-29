@@ -37,6 +37,8 @@ namespace PolyCardio
 
         public const string txErrorInitPort = "Error initialize virtual serial port";
         public const string txError = "Error";
+        public const string txWarning = "Warning";
         public const string txReserved = "RESERVED";
+        public const string txFileExists = "File exists. Overwrite?";
     }
 }

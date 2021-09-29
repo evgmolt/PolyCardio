@@ -22,6 +22,7 @@ namespace PolyCardio
             numUDRecLen.Value = cfg.RecordLength;
             numUDStartDelay.Value = cfg.StartDelay;
             CB_Filter.Checked = cfg.FilterOn;
+            CB_PressureRelief.Checked = cfg.PressureRelief;
         }
 
         public PolyConfig GetDialogData()
@@ -34,6 +35,7 @@ namespace PolyCardio
             cfg.RecordLength = (int)numUDRecLen.Value;
             cfg.StartDelay = (int)numUDStartDelay.Value;
             cfg.FilterOn = CB_Filter.Checked;
+            cfg.PressureRelief = CB_PressureRelief.Checked;
         }
 
     }

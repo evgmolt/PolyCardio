@@ -36,6 +36,7 @@
             this.CB_Filter = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.numUDStartDelay = new System.Windows.Forms.NumericUpDown();
+            this.CB_PressureRelief = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numUDRecLen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numUDStartDelay)).BeginInit();
             this.SuspendLayout();
@@ -64,7 +65,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 60);
+            this.label2.Location = new System.Drawing.Point(12, 17);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(97, 13);
             this.label2.TabIndex = 10;
@@ -72,7 +73,7 @@
             // 
             // numUDRecLen
             // 
-            this.numUDRecLen.Location = new System.Drawing.Point(115, 58);
+            this.numUDRecLen.Location = new System.Drawing.Point(115, 15);
             this.numUDRecLen.Maximum = new decimal(new int[] {
             20,
             0,
@@ -90,17 +91,18 @@
             // CB_Filter
             // 
             this.CB_Filter.AutoSize = true;
-            this.CB_Filter.Location = new System.Drawing.Point(18, 130);
+            this.CB_Filter.Location = new System.Drawing.Point(15, 130);
             this.CB_Filter.Name = "CB_Filter";
             this.CB_Filter.Size = new System.Drawing.Size(48, 17);
             this.CB_Filter.TabIndex = 15;
             this.CB_Filter.Text = "Filter";
             this.CB_Filter.UseVisualStyleBackColor = true;
+            this.CB_Filter.Visible = false;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 90);
+            this.label4.Location = new System.Drawing.Point(12, 47);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(80, 13);
             this.label4.TabIndex = 16;
@@ -108,7 +110,7 @@
             // 
             // numUDStartDelay
             // 
-            this.numUDStartDelay.Location = new System.Drawing.Point(115, 88);
+            this.numUDStartDelay.Location = new System.Drawing.Point(115, 45);
             this.numUDStartDelay.Maximum = new decimal(new int[] {
             20,
             0,
@@ -118,6 +120,16 @@
             this.numUDStartDelay.Size = new System.Drawing.Size(46, 20);
             this.numUDStartDelay.TabIndex = 17;
             // 
+            // CB_PressureRelief
+            // 
+            this.CB_PressureRelief.AutoSize = true;
+            this.CB_PressureRelief.Location = new System.Drawing.Point(15, 88);
+            this.CB_PressureRelief.Name = "CB_PressureRelief";
+            this.CB_PressureRelief.Size = new System.Drawing.Size(193, 17);
+            this.CB_PressureRelief.TabIndex = 18;
+            this.CB_PressureRelief.Text = "Relief pressure after stop recording ";
+            this.CB_PressureRelief.UseVisualStyleBackColor = true;
+            // 
             // FormConfig
             // 
             this.AcceptButton = this.butOk;
@@ -125,6 +137,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.butCancel;
             this.ClientSize = new System.Drawing.Size(520, 187);
+            this.Controls.Add(this.CB_PressureRelief);
             this.Controls.Add(this.numUDStartDelay);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.CB_Filter);
@@ -152,5 +165,6 @@
         private System.Windows.Forms.CheckBox CB_Filter;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown numUDStartDelay;
+        private System.Windows.Forms.CheckBox CB_PressureRelief;
     }
 }

@@ -16,7 +16,7 @@ namespace PolyCardio
             {
                 aver += inData[i];
             }
-            aver /= size;
+            aver = aver / size;
             for (int i = 0; i < size; i++)
             {
                 tmpBuf[i] = inData[i] - aver;

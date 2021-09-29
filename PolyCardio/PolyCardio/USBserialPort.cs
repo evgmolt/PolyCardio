@@ -51,8 +51,7 @@ namespace PolyCardio
                     catch (Exception)
                     {
                     }
-                }
-                    
+                }                 
             }
         }
         
@@ -155,7 +154,5 @@ namespace PolyCardio
                 Connect();
             }
         }
-
-
     }
 }

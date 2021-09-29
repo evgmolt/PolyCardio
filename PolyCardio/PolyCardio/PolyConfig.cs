@@ -21,7 +21,7 @@ namespace PolyCardio
         public bool FilterOn { get; set; }
         public int StartDelay { get; set; }
         public bool[] VisibleGraphs { get; set; }
-
+        public bool PressureRelief { get; set; }
 
         public PolyConfig()
         {
@@ -41,6 +41,7 @@ namespace PolyCardio
             {
                 VisibleGraphs[i] = true;
             }
+            PressureRelief = true;
         }
 
         public static PolyConfig GetConfig()
